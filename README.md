@@ -5,7 +5,7 @@ FAQ<br>
  - (q) It uses DMA SPI?
  - (r) No. It uses the fastest SPi alternative to keep compatibility if other devices sharing the same SPI lines.
  - (q) It's easy to convert my code to use this library?
- - (r) Yes. It use almost the same commands, only slight differences.
+ - (r) Yes. It use almost the same adafruit GFX commands, only slight differences.
  - (q) It's faster than alternative libraries?
  - (r) Overall yes. Some library are optimized for one CPU and uses DMA that is faster but not so compatible if other SPI devices are sharing the same SPI lines.
  - (q) It's fully SPI transaction compatible.
