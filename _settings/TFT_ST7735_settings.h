@@ -13,6 +13,12 @@ Default:__144_RED_PCB__
 //#define __GREEN_TAB__
 
 /*--------------------------------------------------------------------------------
+Since some CPU has limited RAM, you can force fonts to avoid use it.
+Teensy 3.0, Teensy 3.1 has not real PROGMEM support so it's automatically disabled.
+----------------------------------------------------------------------------------*/
+#define _FORCE_PROGMEM__
+
+/*--------------------------------------------------------------------------------
 Teensy LC optional Direct Port vs digitalWriteFast methods
 If you have any issues ONLY with Teensy LC and other SPI devices that share
 the same SPI lines try to comment the line nelow...
@@ -52,8 +58,8 @@ Default:0x0000 (black)
 //								   DISPLAY PRESET
 /*---------------------------------------------------------------------------------*/
 #if defined(__BLACK_TAB__)
-	const uint8_t _ST7735_TFTWIDTH 		  = 128;
-	const uint8_t _ST7735_TFTHEIGHT 		  = 160;
+	const uint8_t _ST7735_TFTWIDTH 	  = 128;
+	const uint8_t _ST7735_TFTHEIGHT   = 160;
 	const uint8_t _ST7735_COFFSET 	  = 0;
 	const uint8_t _ST7735_ROFFSET 	  = 0;
 	const uint8_t __COLORSPC 		  = 1;// 1:GBR - 0:RGB
@@ -75,8 +81,8 @@ Default:0x0000 (black)
 	const uint8_t _ST7735_CASET[5]    = {4,0x00,0x02,0x00,0x81};
 	const uint8_t _ST7735_RASET[5]    = {4,0x00,0x02,0x00,0x81};
 #elif defined (__RED_PCB1__)
-	const uint8_t _ST7735_TFTWIDTH 		  = 128;
-	const uint8_t _ST7735_TFTHEIGHT 		  = 160;
+	const uint8_t _ST7735_TFTWIDTH 	  = 128;
+	const uint8_t _ST7735_TFTHEIGHT   = 160;
 	const uint8_t _ST7735_COFFSET 	  = 0;
 	const uint8_t _ST7735_ROFFSET 	  = 0;
 	const uint8_t __COLORSPC 		  = 0;// 1:GBR - 0:RGB
@@ -98,8 +104,8 @@ Default:0x0000 (black)
 	const uint8_t _ST7735_CASET[5]    = {4,0x00,0x00,0x00,0x7F};
 	const uint8_t _ST7735_RASET[5]    = {4,0x00,0x00,0x00,0x9F};
 #elif defined (__GREEN_TAB__)
-	const uint8_t _ST7735_TFTWIDTH 		  = 128;
-	const uint8_t _ST7735_TFTHEIGHT 		  = 160;
+	const uint8_t _ST7735_TFTWIDTH 	  = 128;
+	const uint8_t _ST7735_TFTHEIGHT   = 160;
 	const uint8_t _ST7735_COFFSET 	  = 2;
 	const uint8_t _ST7735_ROFFSET 	  = 1;
 	const uint8_t __COLORSPC 		  = 1;// 1:GBR - 0:RGB
@@ -135,4 +141,15 @@ Default:0x0000 (black)
 	const uint8_t pGammaSet[17]= {16,0x09,0x16,0x09,0x20,0x21,0x1B,0x13,0x19,0x17,0x15,0x1E,0x2B,0x04,0x05,0x02,0x0E};
 	const uint8_t nGammaSet[17]= {16,0x0B,0x14,0x08,0x1E,0x22,0x1D,0x18,0x1E,0x1B,0x1A,0x24,0x2B,0x06,0x06,0x02,0x0F};
 #endif
+
+#if defined(__AVR__)
+	#if !defined(_FORCE_PROGMEM__)
+		#define _FORCE_PROGMEM__
+	#endif
+#elif defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MKL26Z64__)
+	#if defined(_FORCE_PROGMEM__)
+		#undef _FORCE_PROGMEM__
+	#endif
+#endif
+
 #endif

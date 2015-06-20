@@ -1,16 +1,16 @@
 #include "TFT_ST7735.h"
 
-#ifdef __AVR__
-	#include <avr/pgmspace.h>
-#elif defined(ESP8266)
-//none
-#elif defined(__SAM3X8E__)
-	#include <include/pio.h>
-	#define PROGMEM
-	#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-	#define pgm_read_word(addr) (*(const unsigned short *)(addr))
-	typedef unsigned char prog_uchar;
-#endif
+// #ifdef __AVR__
+	// #include <avr/pgmspace.h>
+// #elif defined(ESP8266)
+
+// #elif defined(__SAM3X8E__)
+	// #include <include/pio.h>
+	// #define PROGMEM
+	// #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+	// #define pgm_read_word(addr) (*(const unsigned short *)(addr))
+	// typedef unsigned char prog_uchar;
+// #endif
 	
 //constructors
 
@@ -209,14 +209,17 @@ void TFT_ST7735::begin(void)
 	_initError = 0b00000000;
 	_width    = _ST7735_TFTWIDTH;
 	_height   = _ST7735_TFTHEIGHT;
-	rotation  = 0;
-	cursor_y  = cursor_x    = 0;
-	textsize  = 1;
+	_rotation  = 0;
+	_cursor_y  = _cursor_x    = 0;
+	_fontScaling  = 1;
+	_spaceWidth = 0;
+	_interline = 0;
+	_centerText = false;
 	_defaultBackground = _ST7735_BACKGROUND;
 	_defaultForeground = _ST7735_FOREGROUND;
-	textcolor = textbgcolor = _defaultForeground;
+	_textcolor = _textbgcolor = _defaultForeground;
 	wrap      = true;
-	setFont(GFXFONT_GLCD);
+	setFont(&internal);
 	_arcAngleMax = 360;
 	_arcAngleOffset = -90;
 	_bklPin = 255;
@@ -619,7 +622,7 @@ void TFT_ST7735::scroll(uint16_t adrs) {
 
 //fast
 void TFT_ST7735::fillScreen(uint16_t color) {
-	int16_t px;
+	uint16_t px;
 	
 	startTransaction();
 	
@@ -636,8 +639,8 @@ void TFT_ST7735::fillScreen(uint16_t color) {
 	//set cursor to 0
 	/*
 	setAddrWindow_cont(0,0,0,0);
-	cursor_x = 0;
-	cursor_y = 0;
+	_cursor_x = 0;
+	_cursor_y = 0;
 	endTransaction();
 	*/
 }
@@ -649,18 +652,19 @@ void TFT_ST7735::homeAddress()
 }
 
 
-void TFT_ST7735::setCursor(int16_t x, int16_t y) 
+void TFT_ST7735::setCursor(int16_t x, int16_t y,bool centerText) 
 {
 	if (boundaryCheck(x,y)) return;
 	setAddrWindow(0x00,0x00,x,y);
-	cursor_x = x;
-	cursor_y = y;
+	_cursor_x = x;
+	_cursor_y = y;
+	_centerText = centerText;
 }
 
 void TFT_ST7735::getCursor(int16_t &x, int16_t &y) 
 {
-	x = cursor_x;
-	y = cursor_y;
+	x = _cursor_x;
+	y = _cursor_y;
 }
 
 //fast
@@ -678,18 +682,18 @@ void TFT_ST7735::drawPixel(int16_t x, int16_t y, uint16_t color)
 
 void TFT_ST7735::setTextSize(uint8_t s) 
 {
-	textsize = (s > 0) ? s : 1;
+	_fontScaling = (s > 0) ? s : 1;
 }
 
 void TFT_ST7735::setTextColor(uint16_t color) 
 {
-	textcolor = textbgcolor = color;
+	_textcolor = _textbgcolor = color;
 }
 
 void TFT_ST7735::setTextColor(uint16_t frgrnd, uint16_t bckgnd) 
 {
-	textcolor = frgrnd;
-	textbgcolor = bckgnd;
+	_textcolor = frgrnd;
+	_textbgcolor = bckgnd;
 }
 
 void TFT_ST7735::setBackground(uint16_t color) 
@@ -720,7 +724,7 @@ void TFT_ST7735::setTextWrap(boolean w)
 
 uint8_t TFT_ST7735::getRotation(void)  
 {
-	return rotation;
+	return _rotation;
 }
 
 bool TFT_ST7735::boundaryCheck(int16_t x,int16_t y){
@@ -741,17 +745,17 @@ void TFT_ST7735::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y
 
 
 void TFT_ST7735::setRotation(uint8_t m) {
-	rotation = m % 4; // can't be higher than 3
+	_rotation = m % 4; // can't be higher than 3
 	_Mactrl_Data &= ~(0xF0);//clear bit 4...7
 	_width  = _ST7735_TFTWIDTH;
 	_height = _ST7735_TFTHEIGHT;
-	if (rotation == 0){
+	if (_rotation == 0){
 		_portrait = false;
-	} else if (rotation == 1){
+	} else if (_rotation == 1){
 		bitSet(_Mactrl_Data,6);
 		bitSet(_Mactrl_Data,5);
 		_portrait = true;
-	} else if (rotation == 2){
+	} else if (_rotation == 2){
 		bitSet(_Mactrl_Data,7);
 		bitSet(_Mactrl_Data,6);
 		_portrait = false;
@@ -790,28 +794,31 @@ int16_t TFT_ST7735::height(void) const {
 -----------------------------------------------------------------------------------------------------*/
 
 
-void TFT_ST7735::setFont(uint8_t f) 
+void TFT_ST7735::setFont(const tFont *font) 
 {
-	font = f;
-	switch(font) {
-		case GFXFONT_GLCD:
-			fontData = glcdFont;
-			fontKern = 1;
-		break;
-		case GFXFONT_GLCD_ASCII:
-			fontData = glcdFont_ascii;
-			fontKern = 1;
-		break;
-		default:
-			font = GFXFONT_GLCD;
-			fontData = glcdFont;
-			fontKern = 1;
-		break;
+	_currentFont = font;
+	_fontHeight = 		_currentFont->font_height;
+	_fontWidth = 		_currentFont->font_width;//if 0 it's variable
+	_fontCompression = 	_currentFont->rle;
+	//get one time all needed infos
+	if (_fontWidth > 0){
+		_spaceWidth = _fontWidth;
+	} else {
+		_spaceWidth = searchCharCode(0x20);
 	}
-	fontWidth = pgm_read_byte(fontData+FONT_WIDTH);
-	fontHeight = pgm_read_byte(fontData+FONT_HEIGHT);
-	fontStart = pgm_read_byte(fontData+FONT_START);
-	fontLength = pgm_read_byte(fontData+FONT_LENGTH);
+	// Serial.println("---- setFont ----");
+	// Serial.print("fontHeight:");
+	// Serial.print(_fontHeight);
+	// Serial.print(" | fontHeight:");
+	// Serial.print(_fontWidth);
+	// Serial.print(" | spaceWidth:");
+	// Serial.print(_spaceWidth);
+	// Serial.print("\n");
+}
+
+void TFT_ST7735::setFontInterline(uint8_t val) 
+{
+	_interline = val;
 }
 
 
@@ -1659,71 +1666,7 @@ void TFT_ST7735::fillCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t corn
 	}
 }
 
-//fast
-size_t TFT_ST7735::write(uint8_t c) 
-{
-	if (c == '\n') {
-		cursor_y += textsize*8;
-		cursor_x  = 0;
-	} else if (c == '\r') {
-		// skip em
-	} else {
-		startTransaction();
-		drawChar_cont(cursor_x,cursor_y,c,textcolor,textbgcolor,textsize);
-		if (fontKern > 0 && textcolor != textbgcolor) {
-			fillRect_cont(cursor_x+fontWidth*textsize,cursor_y,fontKern*textsize,fontHeight*textsize,textbgcolor);
-		}
-		#if defined(__MK20DX128__) || defined(__MK20DX256__)	
-			writecommand_last(CMD_NOP);
-		#endif
-		endTransaction();
-		cursor_x += textsize*(fontWidth+fontKern);
-		if (wrap && (cursor_x > (_width - textsize*fontWidth))) {
-			cursor_y += textsize*fontHeight;
-			cursor_x = 0;
-		}
-	}
-  return 1;
-}
 
-
-//fast
-void TFT_ST7735::drawChar_cont(int16_t x, int16_t y, unsigned char c,uint16_t color, uint16_t bg, uint8_t size) {
-	if((x >= _width)             || // Clip right
-		(y >= _height)           || // Clip bottom
-		((x + 6 * size - 1) < 0) || // Clip left
-		((y + 8 * size - 1) < 0))   // Clip top
-    return;
-	if (c < fontStart || c > fontStart+fontLength) {
-		c = 0;
-	} else {
-		c -= fontStart;
-	}
-	uint16_t bitCount = 0;
-	uint16_t line = 0;
-	uint16_t i,j;
-	int fontIndex = (c*(fontWidth*fontHeight)/8)+4;
-	for (i=0; i<fontHeight; i++ ) {
-		//uint8_t line;
-		for (j = 0; j<fontWidth; j++) {
-			if (bitCount++%8 == 0) line = pgm_read_byte(fontData+fontIndex++);
-			if (line & 0x80) {
-				if (size > 1) {//big
-					fillRect_cont(x+(j*size), y+(i*size), size, size, color);
-				} else {  // default size
-					drawPixel_cont(x+j, y+i, color);
-				} 
-			} else if (bg != color) {
-				if (size > 1) {// big
-					fillRect_cont(x+(j*size), y+(i*size), size, size, bg);
-				} else {  // def size
-					drawPixel_cont(x+j, y+i, bg);
-				}
-			}		
-			line <<= 1;
-		}
-	}
-}
 
 //fast
 void TFT_ST7735::startPushData(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
@@ -1821,5 +1764,319 @@ void TFT_ST7735::drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t 
 		}
     }
   }
+}
+
+int TFT_ST7735::searchCharCode(uint8_t ch)
+{
+	int i;
+	for (i=0;i<_currentFont->length;i++){//search for char code
+		#if defined(_FORCE_PROGMEM__)
+			
+			//uint8_t ccode = pgm_read_byte(&_currentFont->chars[i].char_code);
+			//uint8_t ccode = PROGMEM_GET(&_currentFont->chars[i].char_code);
+			//uint8_t ccode = pgm_read_byte(_currentFont->chars[i].char_code);
+			uint8_t ccode = _currentFont->chars[i].char_code;
+			if (ccode == ch){//found char!
+				 // Serial.println("\n--- searchCharCode ---");
+				 // Serial.print("len:");
+				 // Serial.print(_currentFont->length,DEC);
+				 // Serial.print(" | charCode:0x");
+				 // Serial.print(ccode);
+				 // Serial.print(" | index:");
+				 // Serial.print(i);
+				return i;
+			}
+		#else
+			if (_currentFont->chars[i].char_code == ch){//found char!
+				return i;
+			}
+		#endif
+	}//i
+	return -1;
+}
+
+void TFT_ST7735::textWrite(const char* buffer, uint16_t len)
+{
+	uint16_t i;
+	int charIndex = -1;
+	uint8_t currCharWidth = 0;
+	if (len == 0) len = strlen(buffer);
+	//todo, fix issue if theres several spaces inside text
+	if (_centerText){
+		_centerText = false;
+		if (_fontWidth > 0){//fixed w
+			_cursor_x = _cursor_x - (((len * _spaceWidth) * _fontScaling)/2);
+		} else {//variable width
+			uint16_t totW = 0;
+			
+			for (i=0;i<len;i++){//loop trough buffer
+				if (buffer[i] != 13 && buffer[i] != 10){//avoid special char
+					charIndex = searchCharCode(buffer[i]);
+					if (charIndex > -1) {
+						#if defined(_FORCE_PROGMEM__)
+							currCharWidth = PROGMEM_read(&_currentFont->chars[charIndex].image->image_width);
+							totW += (currCharWidth * _fontScaling);
+						#else
+							totW += (_currentFont->chars[charIndex].image->image_width * _fontScaling);
+						#endif
+
+					}
+				}
+			}
+			_cursor_x = _cursor_x - (totW / 2);
+		}
+		_cursor_y = _cursor_y - (_fontHeight * _fontScaling)/2  - _fontScaling;
+		setCursor(_cursor_x,_cursor_y,false);
+	}
+
+	for (i=0;i<len;i++){
+		if (buffer[i] == 13){										//\r
+			//nothing
+		} else if (buffer[i] == 10){								//\n
+			_cursor_y += (_fontHeight*_fontScaling) + _interline;
+			_cursor_x  = 0;
+		} else {													//chars
+			charIndex = searchCharCode(buffer[i]);
+			if (charIndex > -1){//valid?
+				//Serial.println("\nchar exists");
+				startTransaction();
+				if (buffer[i] == 0x20){								//space
+					uint16_t bcol;
+					if (_textcolor != _textbgcolor){
+						bcol = _textbgcolor;
+					} else {
+						bcol = _defaultBackground;
+					}
+					fillRect_cont(
+								_cursor_x,
+								_cursor_y,
+								(_spaceWidth * _fontScaling),
+								(_fontHeight * _fontScaling),
+								bcol
+					);
+					_cursor_x = _cursor_x + (_spaceWidth * _fontScaling);
+				} else {											// all chars
+					#if defined(_FORCE_PROGMEM__)
+						currCharWidth = PROGMEM_read(&_currentFont->chars[charIndex].image->image_width);
+						const uint8_t * charGlyps = PROGMEM_read(&_currentFont->chars[charIndex].image->data);
+					#else
+						currCharWidth = _currentFont->chars[charIndex].image->image_width;
+						const uint8_t * charGlyps = _currentFont->chars[charIndex].image->data;
+					#endif
+					
+					//#if defined(_FORCE_PROGMEM__)
+						// Serial.print("\ncharW:");
+						// Serial.print(currCharWidth,DEC);
+						// Serial.print("\n");
+						//Serial.println(PROGMEM_read(&charGlyps[0]),HEX);
+						
+						if (_fontCompression){
+							drawChar_compressed(
+										_cursor_x,
+										_cursor_y,
+										currCharWidth,
+										_fontHeight,
+										charGlyps
+							);
+						} else {
+							drawChar_uncompressed(
+										_cursor_x,
+										_cursor_y,
+										currCharWidth,
+										charGlyps
+							);
+						}
+						
+						
+						if (_textcolor != _textbgcolor) {
+							fillRect_cont(
+									_cursor_x + (currCharWidth * _fontScaling),
+									_cursor_y,
+									_fontScaling,
+									(_fontHeight * _fontScaling),
+									_textbgcolor
+							);
+						}
+						
+						_cursor_x += currCharWidth * _fontScaling;
+						if (wrap && (_cursor_x > (_width - (currCharWidth *_fontScaling)))) {
+							_cursor_y += (_fontHeight * _fontScaling) + _interline;
+							_cursor_x = 0;
+						}
+				}
+				#if defined(__MK20DX128__) || defined(__MK20DX256__)	
+					writecommand_last(CMD_NOP);
+				#endif
+				endTransaction();
+			}//valid
+		}//chars
+	}//for loop
+}
+
+//TODO Use line writing (by using buffer) instead drawPixel_cont
+void TFT_ST7735::drawChar_uncompressed(int16_t x,int16_t y,int16_t w,const uint8_t *data)
+{
+	if ((x >= _width)             			||  // Clip right
+		(y >= _height)           			||  // Clip bottom
+		((x + w * _fontScaling - 1) < 0) 	||  // Clip left
+		((y + _fontHeight * _fontScaling - 1) < 0))   	// Clip top
+    return;
+
+	uint16_t bitCount = 0;
+	uint16_t line = 0;
+	int j;
+	uint16_t i;//,idx;
+	//uint16_t buffer[w*_fontScaling];//temp buffer
+	for (i=0; i<_fontHeight; i++ ) {	//Y
+		//idx = 0;
+		for (j = 0; j<w; j++) {			//X		
+			if (bitCount++%8 == 0) {
+				#if defined(_FORCE_PROGMEM__)
+					line = PROGMEM_read(&*data++);
+				#else
+					line = *data++;
+				#endif
+			}
+			if (line & 0x80) {
+				if (_fontScaling > 1) {//big
+					fillRect_cont(x+(j*_fontScaling), y+(i*_fontScaling), _fontScaling, _fontScaling, _textcolor);
+				} else {  // default size
+					drawPixel_cont(x+j, y+i, _textcolor);
+				} 
+			} else if (_textbgcolor != _textcolor) {
+				if (_fontScaling > 1) {// big
+					fillRect_cont(x+(j*_fontScaling), y+(i*_fontScaling), _fontScaling, _fontScaling, _textbgcolor);
+				} else {  // def size
+					drawPixel_cont(x+j, y+i, _textbgcolor);
+				}
+			}		
+			line <<= 1;
+			//idx++;
+		}
+	}
+}
+
+//NOT Finished
+void TFT_ST7735::drawChar_compressed(int16_t x, int16_t y,int16_t w,int16_t h,const uint8_t *pdata)
+{
+
+    int next = 0;
+
+    int16_t cwidth;
+	uint16_t size = w * h;
+    int16_t i, k;
+    int cnt, c, v;
+
+	setAddrWindow_cont(x,y,(x + w)-1,(y - h)-1);
+	#if !defined(__MK20DX128__) && !defined(__MK20DX256__)
+		enableDataStream();
+	#endif
+	y = 0;
+	cwidth = 0;
+	while (size > 0) {
+		#if defined(_FORCE_PROGMEM__)
+		if (!next){
+			c = (PROGMEM_read(&*pdata) >> 8) & 0xff;
+		} else {
+			c = PROGMEM_read(&*pdata) & 0xff;
+			pdata++;
+		}
+		#else
+		if (!next){
+			c = (*pdata >> 8) & 0xff;
+		} else {
+			c = *pdata & 0xff;
+			*pdata++;
+		}
+		#endif
+		next ^= 1;
+		if (c > 128) {
+			cnt = c - 128;
+			for (i = 0; i < cnt; i++){
+				#if defined(_FORCE_PROGMEM__)
+				if (!next){
+					c = (PROGMEM_read(&*pdata) >> 8) & 0xff;
+				} else {
+					c = PROGMEM_read(&*pdata) & 0xff;
+					pdata++;
+				}
+				#else
+				if (!next){
+					c = (*pdata >> 8) & 0xff;
+				} else {
+					c = *pdata & 0xff;
+					*pdata++;
+				}
+				#endif
+				next ^= 1;
+				if (cwidth < 1) {
+					cwidth = w;
+					y++;
+				}
+				for (k = 0; k < 8 && cwidth > 0; k++, c <<= 1, size--, cwidth--){
+					if ((c & 0x80) != 0) {
+						#if defined(__MK20DX128__) || defined(__MK20DX256__)
+							writedata16_cont(_textcolor);
+						#else
+							spiwrite16(_textcolor);
+						#endif
+						//Serial.print("*");
+					} else {
+						#if defined(__MK20DX128__) || defined(__MK20DX256__)
+							writedata16_cont(_textbgcolor);
+						#else
+							spiwrite16(_textbgcolor);
+						#endif
+						//Serial.print(" ");
+					}
+				}
+				//Serial.print("\n");
+			}
+		} else {
+			cnt = c;
+			#if defined(_FORCE_PROGMEM__)
+			if (!next){
+				c = (PROGMEM_read(&*pdata) >> 8) & 0xff;
+			} else {
+				c = PROGMEM_read(&*pdata) & 0xff;
+				pdata++;
+			}
+			#else
+			if (!next){
+				c = (*pdata >> 8) & 0xff;
+			} else {
+				c = *pdata & 0xff;
+				*pdata++;
+			}
+			#endif
+			next ^= 1;
+			for (i = 0; i < cnt; i++){
+				v = c;
+				if (cwidth < 1) {
+					cwidth = w;
+					y++;
+				}
+				for (k = 0; k < 8 && cwidth > 0; k++, v <<= 1, size--, cwidth--){
+					if ((v & 0x80) != 0) {
+						#if defined(__MK20DX128__) || defined(__MK20DX256__)
+							writedata16_cont(_textcolor);
+						#else
+							spiwrite16(_textcolor);
+						#endif
+						//Serial.print("*");
+					} else {
+						#if defined(__MK20DX128__) || defined(__MK20DX256__)
+							writedata16_cont(_textbgcolor);
+						#else
+							spiwrite16(_textbgcolor);
+						#endif
+						//Serial.print(" ");
+					}
+				}
+				//Serial.print("\n");
+			}
+		}
+	}
+
 }
 

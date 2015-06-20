@@ -46,6 +46,8 @@
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Version:
 	1.0p1: A first working preview!
+	1.0.1b1: beta working version with external fonts (ready for rle compressed fonts)
+	
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	BugList of the current version:
 	
@@ -58,11 +60,11 @@
 
 #include "Arduino.h"
 #include "Print.h"
-#include "fonts.h"
 #include <limits.h>
 #include "pins_arduino.h"
 #include "wiring_private.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <SPI.h>
 
@@ -92,6 +94,22 @@
 	static SPISettings ST7735_SPI;
 #endif
 
+#include "font.h"
+#include "fonts/internal.h"//load default font
+
+
+#if defined(_FORCE_PROGMEM__)
+
+	template <typename T> T PROGMEM_read (const T * sce)
+	{
+		static T temp;
+		memcpy_P (&temp, sce, sizeof (T));
+		return temp;
+	}
+	
+//#define PROGMEM_GET(x) __builtin_choose_expr (__builtin_types_compatible_p (typeof(*x), uint8_t),(typeof(*x))pgm_read_byte(x),(typeof(*x))pgm_read_word(x))
+#endif
+
 class TFT_ST7735 : public Print {
 
  public:
@@ -104,83 +122,96 @@ class TFT_ST7735 : public Print {
 		TFT_ST7735(uint8_t cspin,uint8_t dcpin,uint8_t rstpin=255);
 	#endif
 	
-	void     	begin(void);
-	void		setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-	int16_t		height(void) const;
-	int16_t 	width(void) const;
-	void		setRotation(uint8_t r);
-	uint8_t 	getRotation(void);
-	void		invertDisplay(boolean i);
-	void 		setBackground(uint16_t color);
-	void 		setForeground(uint16_t color);
-	uint16_t 	getBackground(void);
-	uint16_t 	getForeground(void);
-	void		useBacklight(const uint8_t pin);
+	void     		begin(void);
+	void			setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+	int16_t			height(void) const;
+	int16_t 		width(void) const;
+	void			setRotation(uint8_t r);
+	uint8_t 		getRotation(void);
+	void			invertDisplay(boolean i);
+	void 			setBackground(uint16_t color);
+	void 			setForeground(uint16_t color);
+	uint16_t 		getBackground(void);
+	uint16_t 		getForeground(void);
+	void			useBacklight(const uint8_t pin);
 	//---------------------------- GEOMETRIC ------------------------------------------------
-	void		fillScreen(uint16_t color),
-				clearScreen(void),//fill with color choosed in setBackground
-				drawPixel(int16_t x, int16_t y, uint16_t color),
-				drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
-				drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
-				drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color),
-				drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
-				fillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color),
-				drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
-				fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
-				drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
-				fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
-				drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
-				fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
-				drawQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
-				fillQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
-				drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diameter, float rot, uint16_t color),
-				drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-	void 		drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color) {
+	void			fillScreen(uint16_t color),
+					clearScreen(void),//fill with color choosed in setBackground
+					drawPixel(int16_t x, int16_t y, uint16_t color),
+					drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
+					drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
+					drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color),
+					drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
+					fillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color),
+					drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
+					fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
+					drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+					fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+					drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
+					fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
+					drawQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
+					fillQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
+					drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diameter, float rot, uint16_t color),
+					drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+	void 			drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color) {
 					if (start == 0 && end == _arcAngleMax) {
 						drawArcHelper(cx, cy, radius, thickness, 0, _arcAngleMax, color);
 					} else {
 						drawArcHelper(cx, cy, radius, thickness, start + (_arcAngleOffset / (float)360)*_arcAngleMax, end + (_arcAngleOffset / (float)360)*_arcAngleMax, color);
 					}	
 				}
-	//void		drawPie(int16_t x, int16_t y, int16_t r, int16_t rs, int16_t re,uint16_t color);
-	void 		drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiusH,uint16_t color);
-	//void		drawBezier(int x0, int y0, int x1, int y1, int x2, int y2, uint16_t color);
+	//void			drawPie(int16_t x, int16_t y, int16_t r, int16_t rs, int16_t re,uint16_t color);
+	void 			drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiusH,uint16_t color);
+	//void			drawBezier(int x0, int y0, int x1, int y1, int x2, int y2, uint16_t color);
 	//------------------------------- BITMAP --------------------------------------------------
-	void		drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,int16_t w, int16_t h, uint16_t color);
-	void		drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h,uint16_t color, uint16_t bg);
-	void		pushColor(uint16_t color);
-	void 		startPushData(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-	void 		pushData(uint16_t color);
-	void 		endPushData();
-	void 		drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint32_t *bitmap,bool true24=true); 
+	void			drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,int16_t w, int16_t h, uint16_t color);
+	void			drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h,uint16_t color, uint16_t bg);
+	void			pushColor(uint16_t color);
+	void 			startPushData(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+	void 			pushData(uint16_t color);
+	void 			endPushData();
+	void 			drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint32_t *bitmap,bool true24=true); 
 	//------------------------------- TEXT ----------------------------------------------------
-    void		setTextColor(uint16_t color);
-    void		setTextColor(uint16_t frgrnd, uint16_t bckgnd);
-    void		setTextSize(uint8_t s);
-    void		setTextWrap(boolean w);
-    void		setFont(uint8_t f);
-	void		setCursor(int16_t x,int16_t y);
-	void		getCursor(int16_t &x,int16_t &y);
-	uint8_t 	getErrorCode(void);
-	//void		idleMode(boolean onOff);
-	void		display(boolean onOff);	
-	void		sleepMode(boolean mode);
-	void 		defineScrollArea(int16_t tfa, int16_t bfa);
-	void		scroll(uint16_t adrs);
+    void			setTextColor(uint16_t color);
+    void			setTextColor(uint16_t frgrnd, uint16_t bckgnd);
+    void			setTextSize(uint8_t s);
+    void			setTextWrap(boolean w);
+    void 			setFontInterline(uint8_t val);
+	void			setFont(const tFont *font);
+	void			setCursor(int16_t x,int16_t y,bool centerText=false);
+	void			getCursor(int16_t &x,int16_t &y);
+	uint8_t 		getErrorCode(void);
+	//void			idleMode(boolean onOff);
+	void			display(boolean onOff);	
+	void			sleepMode(boolean mode);
+	void 			defineScrollArea(int16_t tfa, int16_t bfa);
+	void			scroll(uint16_t adrs);
 	inline uint16_t Color565(uint8_t r, uint8_t g, uint8_t b) {return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);};
 	inline uint16_t Color24To565(int32_t color_) { return ((((color_ >> 16) & 0xFF) / 8) << 11) | ((((color_ >> 8) & 0xFF) / 4) << 5) | (((color_) &  0xFF) / 8);}
 	inline uint16_t htmlTo565(int32_t color_) { return (uint16_t)(((color_ & 0xF80000) >> 8) | ((color_ & 0x00FC00) >> 5) | ((color_ & 0x0000F8) >> 3));}
-	void 		setBitrate(uint32_t n);	
-	virtual size_t write(uint8_t);
-	
+	void 			setBitrate(uint32_t n);	
+	virtual size_t write(uint8_t b) {
+		textWrite((const char *)&b, 1);
+		return 1;
+	}
+
+	virtual size_t write(const uint8_t *buffer, size_t size) {
+		textWrite((const char *)buffer, size);
+		return size;
+	}
+
  protected:
 	int16_t 				_width, _height;
-	int16_t 				cursor_x, cursor_y;
-	uint16_t 				textcolor, textbgcolor;
-	uint8_t 				textsize, rotation, font, fontWidth, fontHeight, fontStart, fontLength;
-	int8_t  				fontKern;
+	int16_t 				_cursor_x, _cursor_y;
+	uint16_t 				_textcolor, _textbgcolor;
+	uint8_t					_fontScaling, _fontWidth, _fontHeight;
+	uint8_t					_interline;
+	bool					_fontCompression;
+	bool					_centerText;
+	int						_spaceWidth;
+	uint8_t					_rotation;
 	boolean					_portrait;
-	const unsigned char *	fontData;
+	const tFont 		*	_currentFont;
 	boolean 				wrap; // If set, 'wrap' text at right edge of display
 	volatile uint8_t		_Mactrl_Data;
 	uint8_t					_colorspaceData;
@@ -644,7 +675,9 @@ class TFT_ST7735 : public Print {
 	float 		_arcAngleMax;
 	int 		_arcAngleOffset;
 	//HELPERS--------------------------------------------------------------------------------------
-	void		drawChar_cont(int16_t x, int16_t y, unsigned char c, uint16_t color,uint16_t bg, uint8_t size);
+	void    	textWrite(const char* buffer, uint16_t len=0);
+	void	 	drawChar_uncompressed(int16_t x,int16_t y,int16_t w,const uint8_t *data);
+	void 		drawChar_compressed(int16_t x, int16_t y,int16_t w,int16_t h,const uint8_t *pdata);
 	void 		plot4points_cont(uint16_t cx, uint16_t cy, uint16_t x, uint16_t y, uint16_t color);
 	void		drawCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,uint16_t color);
 	void		fillCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,int16_t delta, uint16_t color);
@@ -657,6 +690,7 @@ class TFT_ST7735 : public Print {
 	void 		setArcParams(float arcAngleMax, int arcAngleOffset);
 	bool 		sendRegister_cont(const uint8_t reg[],const uint8_t cmd);
 	void 		sendCommand_cont(const uint8_t cmd);
+	int			searchCharCode(uint8_t ch);
 
 };
 #endif
