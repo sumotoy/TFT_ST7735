@@ -14,6 +14,7 @@ The goals are:<br>
 - Full SPI Transaction compatible (where supported).<br>
 - 30Mhz or more SPI capable.<br>
 - Use just 4 wires (all outputs)<br>
+- Separate User settings file let you add different displays without impact resource usage.<br>
 - Commands are very similar to Adafruit libraries so easy to migrate.
 
 The current beta it's a working preview, the rle decompressor it's included but I'm still working on it so the included fonts are not compressed. The internal font it's quite large, has full set ASCII and much better than one from Adafruit, fonts was created with a modified program that I will release as soon the author give me the authorization, in the meantime if you have free font you want to include please let me know and send, I can convert ttf or standard character but NOT bitmaps or image fonts, I need to enlarge to do a good conversion.<br>
