@@ -11,14 +11,6 @@
 #endif
 
 
-// Color definitions
-#define	BLUE    0x001F
-#define	RED     0xF800
-#define	GREEN   0x07E0
-#define CYAN    0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW  0xFFE0
-
 uint8_t errorCode = 0;
 
 /*
@@ -27,7 +19,14 @@ You are using 4 wire SPI here, so:
  MOSI:  11//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
  MISO:  12//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
  SCK:   13//Teensy3.x/Arduino UNO (for MEGA/DUE refere to arduino site)
- the rest of pin below:
+ESP8266-----------------------------------
+Use:
+#define __CS  16  //(D0)
+#define __DC  5   //(D1)
+#define __RST 4   //(D2)
+
+ SCLK:D5
+ MOSI:D7
  */
 #define __CS 	10
 #define __DC 	6
@@ -135,17 +134,17 @@ unsigned long testText() {
   unsigned long start = micros();
   tft.setCursor(0, 0);
   tft.setTextColor(WHITE);
-  tft.setTextSize(1);
+  tft.setTextScale(1);
   tft.println("Hello World!");
   tft.setTextColor(YELLOW);
-  tft.setTextSize(2);
+  tft.setTextScale(2);
   tft.println(1234.56);
   tft.setTextColor(RED);
-  tft.setTextSize(3);
+  tft.setTextScale(3);
   tft.println(0xDEAD, HEX);
   tft.println();
   tft.setTextColor(GREEN);
-  tft.setTextSize(4);
+  tft.setTextScale(4);
   tft.println("Hello");
   return micros() - start;
 
@@ -157,9 +156,9 @@ unsigned long testText2() {
   unsigned long start = micros();
   tft.setCursor(0, 0);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
+  tft.setTextScale(2);
   tft.println("I implore thee,");
-  tft.setTextSize(1);
+  tft.setTextScale(1);
   tft.println("my foonting turlingdromes.");
   tft.println("And hooptiously drangle me");
   tft.println("with crinkly bindlewurdles,");

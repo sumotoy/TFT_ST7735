@@ -1,5 +1,6 @@
 /*
 	TFT_ST7735 - A fast SPI driver for TFT that use Sitronix TFT_ST7735.
+	https://github.com/sumotoy/TFT_ST7735
 	
 	Features:
 	- Very FAST!, expecially with Teensy 3.x where uses hyper optimized SPI.
@@ -18,15 +19,15 @@
 	library that I have decide to code a new one from scratch that is based on my
 	ILI9163C one.
 	
-	Code Optimizations:
-	The purpose of this library it's SPEED and COMPATIBILITY. 
-	I have tried to use hardware optimized calls where was possible and results are quite good for 
-	most applications,without sacrifice compatibility when other SPI devices are sharing same lines.
-	Many SPI call has been optimized by reduce un-needed triggers to RS and CS
-	lines. Of course it can be improved so feel free to add suggestions.
+	Features:
+	- Very FAST!, expecially with Teensy 3.x where uses hyper optimized SPI.
+	- It uses just 4 or 5 wires.
+	- Compatible with many CPU (Teensy's, Arduino 8Bit, DUE, ESP8266, SPARK...)
+	- Comparable speed and same commands of my very popular and stable TFT_ILI9136C
+	- Lot of examples.
 	-------------------------------------------------------------------------------
     Copyright (c) 2015, .S.U.M.O.T.O.Y., coded by Max MC Costa.    
-
+	
     TFT_ST7735 Library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -45,14 +46,12 @@
 	Thanks to Jnmattern & Marek Buriak for drawArc!
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Version:
-	1.0p1: A first working preview!
-	1.0.1b1: beta working version with external fonts (ready for rle compressed fonts)
+	1.1b1: Completely redone, now similar to TFT_ILI9136C code.ame commands
 	
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	BugList of the current version:
 	
 	Please report any!
-
 
 */
 #ifndef _TFT_ST7735LIB_H_
@@ -60,60 +59,32 @@
 
 #include "Arduino.h"
 #include "Print.h"
+
 #include <limits.h>
 #include "pins_arduino.h"
 #include "wiring_private.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <SPI.h>
 
+#include "_includes/TFT_ST7735_cpuCommons.h"
+#include "_settings/TFT_ST7735_colors.h"
 #include "_settings/TFT_ST7735_settings.h"
-#if !defined(swap)
-	#if defined(ESP8266)
-		#define swap(a, b) { int16_t t = a; a = b; b = t; }
-	#else
-		#define swap(a, b) { typeof(a) t = a; a = b; b = t; }
-	#endif
+#include "_includes/TFT_ST7735_registers.h"
+
+
+
+#include "_includes/TFT_ST7735_fontDescription.h"
+#include "_fonts/arial_x2.c"
+
+
+
+#if defined(ESP8266) && !defined(_ESP8266_STANDARDMODE)
+	#include <eagle_soc.h>
 #endif
 
-#ifdef __AVR__
-	#include <avr/pgmspace.h>
-#elif defined(__SAM3X8E__)
-	#include <include/pio.h>
-	#define PROGMEM
-	#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-	#define pgm_read_word(addr) (*(const unsigned short *)(addr))
-	typedef unsigned char prog_uchar;
-#endif
-
-//--------- Keep out hands from here!-------------
-#if !defined(BLACK)
-	#define	BLACK   		0x0000
-#endif
-#if !defined(WHITE)
-	#define WHITE   		0xFFFF
-#endif
-
-#include "_settings/TFT_ST7735_registers.h"
 #if defined(SPI_HAS_TRANSACTION)
 	static SPISettings ST7735_SPI;
-#endif
-
-#include "font.h"
-#include "fonts/internal.h"//load default font
-
-
-#if defined(_FORCE_PROGMEM__)
-
-	template <typename T> T PROGMEM_read (const T * sce)
-	{
-		static T temp;
-		memcpy_P (&temp, sce, sizeof (T));
-		return temp;
-	}
-	
-//#define PROGMEM_GET(x) __builtin_choose_expr (__builtin_types_compatible_p (typeof(*x), uint8_t),(typeof(*x))pgm_read_byte(x),(typeof(*x))pgm_read_word(x))
 #endif
 
 class TFT_ST7735 : public Print {
@@ -121,109 +92,138 @@ class TFT_ST7735 : public Print {
  public:
 
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)
-		TFT_ST7735(uint8_t cspin,uint8_t dcpin,uint8_t rstpin=255,uint8_t mosi=11,uint8_t sclk=13);
+		TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
 	#elif defined(__MKL26Z64__)
-		TFT_ST7735(uint8_t cspin,uint8_t dcpin,uint8_t rstpin=255,uint8_t mosi=11,uint8_t sclk=13);
+		TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
 	#else
-		TFT_ST7735(uint8_t cspin,uint8_t dcpin,uint8_t rstpin=255);
+		TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255);
 	#endif
 	
-	void     		begin(void);
-	void			setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-	int16_t			height(void) const;
-	int16_t 		width(void) const;
-	void			setRotation(uint8_t r);
-	uint8_t 		getRotation(void);
-	void			invertDisplay(boolean i);
-	void 			setBackground(uint16_t color);
-	void 			setForeground(uint16_t color);
-	uint16_t 		getBackground(void);
-	uint16_t 		getForeground(void);
-	void			useBacklight(const uint8_t pin);
-	//---------------------------- GEOMETRIC ------------------------------------------------
-	void			fillScreen(uint16_t color),
-					clearScreen(void),//fill with color choosed in setBackground
-					drawPixel(int16_t x, int16_t y, uint16_t color),
-					drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
-					drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
-					drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color),
-					drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
-					fillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color),
-					drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
-					fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
-					drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
-					fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
-					drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
-					fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
-					drawQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
-					fillQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
-					drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diameter, float rot, uint16_t color),
-					drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-	void 			drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color) {
+	void     	begin(bool avoidSPIinit=false);//avoidSPIinit=true set everithing but not call SPI.init()
+	void		setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+	int16_t		height(void) const;
+	int16_t 	width(void) const;
+	void		setRotation(uint8_t r);
+	uint8_t 	getRotation(void);
+	void		invertDisplay(boolean i);
+	void 		setBackground(uint16_t color);
+	void 		setForeground(uint16_t color);
+	uint16_t 	getBackground(void);
+	uint16_t 	getForeground(void);
+	void		useBacklight(const uint8_t pin);
+	void 		backlight(bool state);
+	//---------------------------- GEOMETRY ------------------------------------------------
+	void		fillScreen(uint16_t color),
+				clearScreen(void),//fill with color choosed in setBackground
+				drawPixel(int16_t x, int16_t y, uint16_t color),
+				drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
+				drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
+				drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color),
+				drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
+				fillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color),
+				drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
+				fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color),
+				drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+				fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+				drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
+				fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,int16_t radius, uint16_t color),
+				drawQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color),
+				fillQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color,bool triangled=true),
+				drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diameter, float rot, uint16_t color),
+				drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+	void 		drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color) {
 					if (start == 0 && end == _arcAngleMax) {
 						drawArcHelper(cx, cy, radius, thickness, 0, _arcAngleMax, color);
 					} else {
 						drawArcHelper(cx, cy, radius, thickness, start + (_arcAngleOffset / (float)360)*_arcAngleMax, end + (_arcAngleOffset / (float)360)*_arcAngleMax, color);
 					}	
 				}
-	//void			drawPie(int16_t x, int16_t y, int16_t r, int16_t rs, int16_t re,uint16_t color);
-	void 			drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiusH,uint16_t color);
-	//void			drawBezier(int x0, int y0, int x1, int y1, int x2, int y2, uint16_t color);
+	void 		drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiusH,uint16_t color);
+	void 		ringMeter(int val, int minV, int maxV, uint8_t x, uint8_t y, uint8_t r=20, uint16_t colorScheme=4,uint16_t backSegColor=BLACK,int angle=150,uint8_t inc=5);
+	void 		drawLineAngle(int16_t x, int16_t y, int angle, uint8_t length, uint16_t color,int offset = -90);
+	void 		drawLineAngle(int16_t x, int16_t y, int angle, uint8_t start, uint8_t length, uint16_t color,int offset = -90);
 	//------------------------------- BITMAP --------------------------------------------------
-	void			drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,int16_t w, int16_t h, uint16_t color);
-	void			drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h,uint16_t color, uint16_t bg);
-	void			pushColor(uint16_t color);
-	void 			startPushData(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-	void 			pushData(uint16_t color);
-	void 			endPushData();
-	void 			drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint32_t *bitmap,bool true24=true); 
+	void		drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,int16_t w, int16_t h, uint16_t color);
+	void		drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t w, int16_t h,uint16_t color, uint16_t bg);
+	void		pushColor(uint16_t color);
+	void 		startPushData(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+	void 		pushData(uint16_t color);
+	void 		endPushData();
+	void 		drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint32_t *bitmap,bool true24=true); 
 	//------------------------------- TEXT ----------------------------------------------------
-    void			setTextColor(uint16_t color);
-    void			setTextColor(uint16_t frgrnd, uint16_t bckgnd);
-    void			setTextSize(uint8_t s);
-    void			setTextWrap(boolean w);
-    void 			setFontInterline(uint8_t val);
-	void			setFont(const tFont *font);
-	void			setCursor(int16_t x,int16_t y,bool centerText=false);
-	void			getCursor(int16_t &x,int16_t &y);
-	uint8_t 		getErrorCode(void);
-	//void			idleMode(boolean onOff);
-	void			display(boolean onOff);	
-	void			sleepMode(boolean mode);
-	void 			defineScrollArea(int16_t tfa, int16_t bfa);
-	void			scroll(uint16_t adrs);
+    void		setTextColor(uint16_t color);
+    void		setTextColor(uint16_t frgrnd, uint16_t bckgnd);
+    void		setTextSize(uint8_t s);//will be deprecated
+	void		setTextScale(uint8_t s);
+	void 		setTextSize(uint8_t sx,uint8_t sy);//will be deprecated
+	void 		setTextScale(uint8_t sx,uint8_t sy);
+    void		setTextWrap(boolean w);
+	void		setCharSpacing(uint8_t space);
+	void 		setFontInterline(uint8_t distance);
+	void		setInternalFont(void);
+
+	void 		setFont(const tFont *font);
+	virtual size_t 	write(uint8_t b) { _textWrite((const char *)&b, 1); return 1;}
+	virtual size_t  write(const uint8_t *buffer, size_t size) {_textWrite((const char *)buffer, size); return size;}
+
+    //------------------------------- CURSOR ----------------------------------------------------
+	void		setCursor(int16_t x,int16_t y);
+	void		getCursor(int16_t &x,int16_t &y);
+	//uint8_t		getCursorX(bool inColumns=false);//TBFIX
+	//uint8_t		getCursorY(bool inRows=false);//TBFIX
+	//uint8_t 		getMaxColumns(void);//TBFIX
+	//uint8_t 		getMaxRows(void);//TBFIX
+	//------------------------------- DISPLAY ----------------------------------------------------
+	uint8_t 	getErrorCode(void);
+	void		idleMode(boolean onOff);
+	void		display(boolean onOff);	
+	void		sleepMode(boolean mode);
+	void 		defineScrollArea(uint16_t tfa, uint16_t bfa);
+	void		scroll(uint16_t adrs);
+	#if !defined (SPI_HAS_TRANSACTION)
+	void 		setBitrate(uint32_t n);//will be deprecated
+	#endif
+	//------------------------------- COLOR ----------------------------------------------------
+	uint16_t 	grandient(uint8_t val);
+	uint16_t 	colorInterpolation(uint16_t color1,uint16_t color2,uint16_t pos,uint16_t div=100);
+	uint16_t 	colorInterpolation(uint8_t r1,uint8_t g1,uint8_t b1,uint8_t r2,uint8_t g2,uint8_t b2,uint16_t pos,uint16_t div=100);
 	inline uint16_t Color565(uint8_t r, uint8_t g, uint8_t b) {return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);};
 	inline uint16_t Color24To565(int32_t color_) { return ((((color_ >> 16) & 0xFF) / 8) << 11) | ((((color_ >> 8) & 0xFF) / 4) << 5) | (((color_) &  0xFF) / 8);}
 	inline uint16_t htmlTo565(int32_t color_) { return (uint16_t)(((color_ & 0xF80000) >> 8) | ((color_ & 0x00FC00) >> 5) | ((color_ & 0x0000F8) >> 3));}
-	void 			setBitrate(uint32_t n);	
-	virtual size_t write(uint8_t b) {
-		textWrite((const char *)&b, 1);
-		return 1;
-	}
-
-	virtual size_t write(const uint8_t *buffer, size_t size) {
-		textWrite((const char *)buffer, size);
-		return size;
-	}
-
+	inline void 	Color565ToRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){r = (((color & 0xF800) >> 11) * 527 + 23) >> 6; g = (((color & 0x07E0) >> 5) * 259 + 33) >> 6; b = ((color & 0x001F) * 527 + 23) >> 6;}
+	
+	
  protected:
-	int16_t 				_width, _height;
-	int16_t 				_cursor_x, _cursor_y;
-	uint16_t 				_textcolor, _textbgcolor;
-	uint8_t					_fontScaling, _fontWidth, _fontHeight;
-	uint8_t					_interline;
-	bool					_fontCompression;
-	bool					_centerText;
-	int						_spaceWidth;
+	int16_t 					_width, _height;
+	volatile int16_t 			_cursorX, _cursorY;
+	
+	int					   _spaceCharWidth;
+	const tFont   		*  _currentFont;
+	int 	  	  		   _STRlen_helper(const char* buffer,int len);
+	int 		  		   _getCharCode(uint8_t ch);
+	void 		  		   _textWrite(const char* buffer, uint16_t len);
+	bool 		  		   _renderSingleChar(const char c);
+	void 		 		   _glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,uint8_t scaleY,int index);
+	void 				   _charLineRender(bool lineBuffer[],int charW,int16_t x,int16_t y,uint8_t scaleX,uint8_t scaleY,int16_t currentYposition);
+
+	uint8_t					_charSpacing;
+	uint16_t 				_textForeground;
+	uint16_t 				_textBackground;
+	uint8_t					_textScaleX;
+	uint8_t					_textScaleY;
+	uint8_t					_fontWidth;
+	uint8_t					_fontHeight;
+	uint8_t					_fontInterline;
+	boolean 				_textWrap; // If set, 'wrap' text at right edge of display
+	
 	uint8_t					_rotation;
 	boolean					_portrait;
-	const tFont 		*	_currentFont;
-	boolean 				wrap; // If set, 'wrap' text at right edge of display
+	
 	volatile uint8_t		_Mactrl_Data;
 	uint8_t					_colorspaceData;
-	uint16_t				_defaultBackground;
-	uint16_t				_defaultForeground;
-	uint8_t 				_cs,_rs,_rst;
+	uint16_t				_defaultBgColor;
+	uint16_t				_defaultFgColor;
+	uint8_t 				_rs,_rst;
 	uint8_t					_bklPin;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
 //-------------------------- UNO,DUEMILANOVE,MEGA,LEONARDO,YUN,Etc.----------------------------
@@ -232,8 +232,8 @@ class TFT_ST7735 : public Print {
 		volatile uint8_t 	*dataport, *clkport, *csport, *rsport;
 		uint8_t  			datapinmask, clkpinmask, cspinmask, rspinmask;
 		volatile uint8_t	_dcState;
-		//volatile uint8_t	_csState;
-		
+		uint8_t 			_cs;
+
 		void spiwrite(uint8_t c)
 		__attribute__((always_inline)) {
 			SPDR = c;
@@ -267,12 +267,12 @@ class TFT_ST7735 : public Print {
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.beginTransaction(ST7735_SPI);
 			#endif
-			*csport &= ~cspinmask;//low
+				*csport &= ~cspinmask;//low
 		}
 
 		void endTransaction(void)
 		__attribute__((always_inline)) {
-			*csport |= cspinmask;//hi
+				*csport |= cspinmask;//hi
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.endTransaction();
 			#endif
@@ -284,6 +284,7 @@ class TFT_ST7735 : public Print {
 		Pio 				*dataport, *clkport, *csport, *rsport;
 		uint32_t  			datapinmask, clkpinmask, cspinmask, rspinmask;
 		volatile uint8_t	_dcState;
+		uint8_t 			_cs;
 		
 		void spiwrite(uint8_t c)
 		__attribute__((always_inline)) {
@@ -318,13 +319,13 @@ class TFT_ST7735 : public Print {
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.beginTransaction(ST7735_SPI);
 			#endif
-			csport->PIO_CODR  |=  cspinmask;//LO
+				csport->PIO_CODR  |=  cspinmask;//LO
 		}
 
 
 		void endTransaction(void)
 		__attribute__((always_inline)) {
-			csport->PIO_SODR  |=  cspinmask;//HI
+				csport->PIO_SODR  |=  cspinmask;//HI
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.endTransaction();
 			#endif
@@ -340,7 +341,8 @@ class TFT_ST7735 : public Print {
 		#endif
 		bool				_useSPI1;
 		volatile uint8_t	_dcState;
-		
+		uint8_t 			_cs;
+
 		void spiwrite(uint8_t c)
 		__attribute__((always_inline)) {
 			if (_useSPI1){
@@ -386,13 +388,11 @@ class TFT_ST7735 : public Print {
 	
 		void startTransaction(void)
 		__attribute__((always_inline)) {
-			#if defined(SPI_HAS_TRANSACTION)
 				if (_useSPI1){
 					SPI1.beginTransaction(ST7735_SPI);
 				} else {
 					SPI.beginTransaction(ST7735_SPI);
 				}
-			#endif
 				#if !defined(_TEENSYLC_FASTPORT)
 					digitalWriteFast(_cs,LOW);
 				#else
@@ -408,13 +408,11 @@ class TFT_ST7735 : public Print {
 				#else
 					*csportSet = cspinmask;
 				#endif
-			#if defined(SPI_HAS_TRANSACTION)
 				if (_useSPI1){
 					SPI1.endTransaction();
 				} else {
 					SPI.endTransaction();
 				}
-			#endif
 		}
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
 //----------------------------- Teensy 3.0 - Teensy 3.1 ---------------------------------------
@@ -422,19 +420,16 @@ class TFT_ST7735 : public Print {
 	#elif defined(__MK20DX128__) || defined(__MK20DX256__)//Teensy 3, Teensy 3.1
 		uint8_t 			pcs_data, pcs_command;
 		uint8_t 			_mosi, _sclk;		
+		uint8_t 			_cs;
 		
 		void startTransaction(void)
 		__attribute__((always_inline)) {
-			#if defined(SPI_HAS_TRANSACTION)
-				SPI.beginTransaction(ST7735_SPI);
-			#endif
+			SPI.beginTransaction(ST7735_SPI);
 		}
 
 		void endTransaction(void)
 		__attribute__((always_inline)) {
-			#if defined(SPI_HAS_TRANSACTION)
-				SPI.endTransaction();
-			#endif
+			SPI.endTransaction();
 		}
 		
 		//Here's Paul Stoffregen magic in action...
@@ -443,7 +438,7 @@ class TFT_ST7735 : public Print {
 			uint32_t tmp __attribute__((unused));
 			do {
 				sr = KINETISK_SPI0.SR;
-				if (sr & 0xF0) tmp = SPI0_POPR;  // drain RX FIFO
+				if (sr & 0xF0) tmp = KINETISK_SPI0.POPR;  // drain RX FIFO
 			} while ((sr & (15 << 12)) > (3 << 12));
 		}
 
@@ -453,132 +448,118 @@ class TFT_ST7735 : public Print {
 			do {
 				sr = KINETISK_SPI0.SR;
 				if (sr & 0xF0) tmp = KINETISK_SPI0.POPR;  // drain RX FIFO
-			} while ((sr & 0xF0F0) > 0);// wait both RX & TX empty
+			} while ((sr & 0xF0F0) > 0);             // wait both RX & TX empty
 		}
 		
-		#if !defined(__FORCECOMPAT_SPI)//faster
-			void waitTransmitComplete(void) 
-			__attribute__((always_inline)) {
-				uint32_t tmp __attribute__((unused));
-				while (!(KINETISK_SPI0.SR & SPI_SR_TCF)) ; // wait until final output done
-				tmp = SPI0_POPR;// drain the final RX FIFO word
+		void waitTransmitComplete(void) __attribute__((always_inline)) {
+			uint32_t tmp __attribute__((unused));
+			while (!(KINETISK_SPI0.SR & SPI_SR_TCF)) ; // wait until final output done
+			tmp = KINETISK_SPI0.POPR;                  // drain the final RX FIFO word
+		}
+		
+		void waitTransmitComplete(uint32_t mcr) __attribute__((always_inline)) {
+			uint32_t tmp __attribute__((unused));
+			while (1) {
+				uint32_t sr = KINETISK_SPI0.SR;
+				if (sr & SPI_SR_EOQF) break;  // wait for last transmit
+				if (sr &  0xF0) tmp = KINETISK_SPI0.POPR;
 			}
-		#else
-			void waitTransmitComplete(uint32_t mcr)
-			__attribute__((always_inline)) {
-				uint32_t tmp __attribute__((unused));
-				while (1) {
-					uint32_t sr = KINETISK_SPI0.SR;
-					if (sr & SPI_SR_EOQF) break;  // wait for last transmit
-					if (sr &  0xF0) tmp = KINETISK_SPI0.POPR;
-				}
-				KINETISK_SPI0.SR = SPI_SR_EOQF;
-				SPI0_MCR = mcr;
-				while (KINETISK_SPI0.SR & 0xF0) { tmp = KINETISK_SPI0.POPR; }
+			KINETISK_SPI0.SR = SPI_SR_EOQF;
+			SPI0_MCR = mcr;
+			while (KINETISK_SPI0.SR & 0xF0) {
+				tmp = KINETISK_SPI0.POPR;
 			}
-		#endif
+		}
 	
-		void writecommand_cont(uint8_t c) 
-		__attribute__((always_inline)) {
+		void writecommand_cont(uint8_t c) __attribute__((always_inline)) {
 			KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
 			waitFifoNotFull();
 		}
 	
-		void writedata8_cont(uint8_t c) 
-		__attribute__((always_inline)) {
+		void writedata8_cont(uint8_t c) __attribute__((always_inline)) {
 			KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
 			waitFifoNotFull();
 		}
 	
-		void writedata16_cont(uint16_t d) 
-		__attribute__((always_inline)) {
+		void writedata16_cont(uint16_t d) __attribute__((always_inline)) {
 			KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT;
 			waitFifoNotFull();
 		}
 
-		#if !defined(__FORCECOMPAT_SPI)
-			void writecommand_last(uint8_t c) 
-			__attribute__((always_inline)) {
-				waitFifoEmpty();
-				KINETISK_SPI0.SR = SPI_SR_TCF;
-				KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0);
-				waitTransmitComplete();
-			}
+		void writecommand_last(uint8_t c) __attribute__((always_inline)) {
+			uint32_t mcr = SPI0_MCR;
+			KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
+			waitTransmitComplete(mcr);
+		}
 			
 	
-			void writedata8_last(uint8_t c) 
-			__attribute__((always_inline)) {
-				waitFifoEmpty();
-				KINETISK_SPI0.SR = SPI_SR_TCF;
-				KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0);
-				waitTransmitComplete();
-			}	
+		void writedata8_last(uint8_t c) __attribute__((always_inline)) {
+			uint32_t mcr = SPI0_MCR;
+			KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
+			waitTransmitComplete(mcr);
+		}
 	
-			void writedata16_last(uint16_t d) 
-			__attribute__((always_inline)) {
-				waitFifoEmpty();
-					KINETISK_SPI0.SR = SPI_SR_TCF;
-					KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1);
-				waitTransmitComplete();
-			}
-		#else
-			void writecommand_last(uint8_t c) 
-			__attribute__((always_inline)) {
-				uint32_t mcr = SPI0_MCR;
-				KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				waitTransmitComplete(mcr);
-			}
+		void writedata16_last(uint16_t d) __attribute__((always_inline)) {
+			uint32_t mcr = SPI0_MCR;
+			KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
+			waitTransmitComplete(mcr);
+		}
 
-		
-			void writedata8_last(uint8_t c) 
-			__attribute__((always_inline)) {
-				uint32_t mcr = SPI0_MCR;
-				KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				waitTransmitComplete(mcr);
-			}	
-
-		
-			void writedata16_last(uint16_t d) 
-			__attribute__((always_inline)) {
-				uint32_t mcr = SPI0_MCR;
-				KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-				waitTransmitComplete(mcr);
-			}
-		#endif
+			
 			void setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) 
 			__attribute__((always_inline)) {
-				writecommand_cont(CMD_CASET); // Column
-				writedata16_cont(x0 + _ST7735_COFFSET);
-				writedata16_cont(x1 + _ST7735_COFFSET);
-				writecommand_cont(CMD_RASET); // Page
-				writedata16_cont(y0 + _ST7735_ROFFSET);
-				writedata16_cont(y1 + _ST7735_ROFFSET);
+				writecommand_cont(CMD_CLMADRS); // Column
+				if (_rotation == 0 || _rotation > 1){
+					writedata16_cont(x0);
+					writedata16_cont(x1);
+				} else {
+					writedata16_cont(x0 + __COFFSET);
+					writedata16_cont(x1 + __COFFSET);
+				}
+				writecommand_cont(CMD_PGEADRS); // Page
+				if (_rotation != 0){
+					writedata16_cont(y0);
+					writedata16_cont(y1);
+				} else {
+					writedata16_cont(y0 + __ROFFSET);
+					writedata16_cont(y1 + __ROFFSET);
+				}
 				writecommand_cont(CMD_RAMWR); //Into RAM
 			}
 			
 		// Teensy's 3/3.1 optimized primitives
 		void drawFastHLine_cont(int16_t x, int16_t y, int16_t w, uint16_t color) 
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, x+w-1, y);
+			setAddrWindow_cont(x, y, x + w - 1, y);
 			do { writedata16_cont(color); } while (--w > 0);
 		}
 
 		void drawFastVLine_cont(int16_t x, int16_t y, int16_t h, uint16_t color) 
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, x, y+h-1);
+			setAddrWindow_cont(x, y, x, y + h - 1);
 			do { writedata16_cont(color); } while (--h > 0);
 		}
 		
 		void drawPixel_cont(int16_t x, int16_t y, uint16_t color) 
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, x+1, y+1);
+			setAddrWindow_cont(x, y, x + 1, y + 1);
 			writedata16_cont(color);
 		}
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
-//----------------------------- Unknown CPU (use legacy SPI) ---------------------------------
+//----------------------------- XTENSA ESP8266  ---------------------------------
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
-	#else
+	#elif defined(ESP8266)
 		volatile uint8_t	_dcState;
+		#if defined(_ESP8266_STANDARDMODE)
+			uint8_t 			_cs;
+		#else
+			uint32_t 			_cs;
+			
+			uint32_t _pinRegister(uint8_t pin)
+			__attribute__((always_inline)) {
+				return _BV(pin);
+			}
+		#endif
 		
 		void spiwrite(uint8_t c)
 		__attribute__((always_inline)) {
@@ -587,8 +568,75 @@ class TFT_ST7735 : public Print {
 	
 		void spiwrite16(uint16_t c)
 		__attribute__((always_inline)) {
-			SPI.transfer(d >> 8);
-			SPI.transfer(d);
+			SPI.transfer(c >> 8);
+			SPI.transfer(c);
+		}
+		
+		
+		void enableCommandStream(void)
+		__attribute__((always_inline)) {
+			if (_dcState){
+				#if defined(_ESP8266_STANDARDMODE)
+					digitalWrite(_rs,LOW);
+				#else
+					GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, _pinRegister(_rs));//L
+				#endif
+				_dcState = 0;
+			}
+		}
+	
+		void enableDataStream(void)
+		__attribute__((always_inline)) {
+			if (!_dcState){
+				#if defined(_ESP8266_STANDARDMODE)
+					digitalWrite(_rs,HIGH);
+				#else
+					GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, _pinRegister(_rs));//H
+				#endif
+				_dcState = 1;
+			}
+		}
+		
+		void startTransaction(void)
+		__attribute__((always_inline)) {
+			#if defined(SPI_HAS_TRANSACTION)
+				SPI.beginTransaction(ST7735_SPI);
+			#endif
+				#if defined(_ESP8266_STANDARDMODE)
+					digitalWrite(_cs,LOW);
+				#else
+					GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, _pinRegister(_cs));//L
+				#endif
+		}
+
+
+		void endTransaction(void)
+		__attribute__((always_inline)) {
+				#if defined(_ESP8266_STANDARDMODE)
+					digitalWrite(_cs,HIGH);
+				#else
+					GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, _pinRegister(_cs));//H
+				#endif
+			#if defined(SPI_HAS_TRANSACTION)
+				SPI.endTransaction();
+			#endif
+		}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+//----------------------------- Unknown CPU (use legacy SPI) ---------------------------------
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+	#else
+		volatile uint8_t	_dcState;
+		uint8_t 			_cs;
+		
+		void spiwrite(uint8_t c)
+		__attribute__((always_inline)) {
+			SPI.transfer(c);
+		}
+	
+		void spiwrite16(uint16_t c)
+		__attribute__((always_inline)) {
+			SPI.transfer(c >> 8);
+			SPI.transfer(c);
 		}
 		
 		
@@ -604,7 +652,7 @@ class TFT_ST7735 : public Print {
 		__attribute__((always_inline)) {
 			if (!_dcState){
 				digitalWrite(_rs,HIGH);
-				__dcState = 1;
+				_dcState = 1;
 			}
 		}
 		
@@ -613,13 +661,13 @@ class TFT_ST7735 : public Print {
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.beginTransaction(ST7735_SPI);
 			#endif
-			digitalWrite(_cs,LOW);
+				digitalWrite(_cs,LOW);
 		}
 
 
 		void endTransaction(void)
 		__attribute__((always_inline)) {
-			digitalWrite(_cs,HIGH);
+				digitalWrite(_cs,HIGH);
 			#if defined(SPI_HAS_TRANSACTION)
 				SPI.endTransaction();
 			#endif
@@ -637,40 +685,53 @@ class TFT_ST7735 : public Print {
 		void setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) 
 		__attribute__((always_inline)) {
 			enableCommandStream();	
-				spiwrite(CMD_CASET); // Column
+			spiwrite(CMD_CLMADRS); // command Column
 			enableDataStream();
-				spiwrite16(x0 + _ST7735_COFFSET);
-				spiwrite16(x1 + _ST7735_COFFSET);
+			if (_rotation == 0 || _rotation > 1){
+				spiwrite16(x0);
+				spiwrite16(x1);
+			} else {
+				spiwrite16(x0 + __COFFSET);
+				spiwrite16(x1 + __COFFSET);
+			}
 			enableCommandStream();
-				spiwrite(CMD_RASET); // Page
+			spiwrite(CMD_PGEADRS); // command Page
 			enableDataStream();
-				spiwrite16(y0 + _ST7735_ROFFSET);
-				spiwrite16(y1 + _ST7735_ROFFSET);
+			if (_rotation != 0){
+				spiwrite16(y0);
+				spiwrite16(y1);
+			} else {
+				spiwrite16(y0 + __ROFFSET);
+				spiwrite16(y1 + __ROFFSET);
+			}
 			enableCommandStream();
-				spiwrite(CMD_RAMWR);
+			spiwrite(CMD_RAMWR);
 		}
 		
 		void drawFastVLine_cont(int16_t x, int16_t y, int16_t h, uint16_t color)
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, x, (y + h) - 1);
-			enableDataStream(); do { spiwrite16(color); } while (--h > 0);
+			setAddrWindow_cont(x, y, x, y + h - 1);
+			enableDataStream();
+			do { spiwrite16(color); } while (--h > 0);
 		}
 
 		void drawFastHLine_cont(int16_t x, int16_t y, int16_t w, uint16_t color) 
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, (x + w) - 1, y);
-			enableDataStream(); do { spiwrite16(color); } while (--w > 0);
+			setAddrWindow_cont(x, y, x + w - 1, y);
+			enableDataStream();
+			do { spiwrite16(color); } while (--w > 0);
 		}
 
 		void drawPixel_cont(int16_t x, int16_t y, uint16_t color) 
 		__attribute__((always_inline)) {
-			setAddrWindow_cont(x, y, x+1, y+1);
-			enableDataStream();spiwrite16(color);
+			setAddrWindow_cont(x, y, x + 1, y + 1);
+			enableDataStream();
+			spiwrite16(color);
 		}
 	#endif
 
  private:
-	//inline void swap(int16_t &a, int16_t &b) { int16_t t = a; a = b; b = t; }
+	inline void swap(int16_t &a, int16_t &b) { int16_t t = a; a = b; b = t; }
 	void 		colorSpace(uint8_t cspace);
 	uint8_t		sleep;
 	void 		chipInit();
@@ -681,9 +742,7 @@ class TFT_ST7735 : public Print {
 	float 		_arcAngleMax;
 	int 		_arcAngleOffset;
 	//HELPERS--------------------------------------------------------------------------------------
-	void    	textWrite(const char* buffer, uint16_t len=0);
-	void	 	drawChar_uncompressed(int16_t x,int16_t y,int16_t w,const uint8_t *data);
-	void 		drawChar_compressed(int16_t x, int16_t y,int16_t w,int16_t h,const uint8_t *pdata);
+	
 	void 		plot4points_cont(uint16_t cx, uint16_t cy, uint16_t x, uint16_t y, uint16_t color);
 	void		drawCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,uint16_t color);
 	void		fillCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,int16_t delta, uint16_t color);
@@ -694,9 +753,8 @@ class TFT_ST7735 : public Print {
 	float 		cosDegrees(float angle);
 	float 		sinDegrees(float angle);
 	void 		setArcParams(float arcAngleMax, int arcAngleOffset);
-	bool 		sendRegister_cont(const uint8_t reg[],const uint8_t cmd);
-	void 		sendCommand_cont(const uint8_t cmd);
-	int			searchCharCode(uint8_t ch);
+	float 		_cosDeg_helper(float angle);
+	float 		_sinDeg_helper(float angle);
 
 };
 #endif
