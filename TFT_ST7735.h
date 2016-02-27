@@ -69,7 +69,13 @@
 #include <SPI.h>
 
 #include "_settings/TFT_ST7735_settings.h"
-
+#if !defined(swap)
+	#if defined(ESP8266)
+		#define swap(a, b) { int16_t t = a; a = b; b = t; }
+	#else
+		#define swap(a, b) { typeof(a) t = a; a = b; b = t; }
+	#endif
+#endif
 
 #ifdef __AVR__
 	#include <avr/pgmspace.h>
@@ -664,7 +670,7 @@ class TFT_ST7735 : public Print {
 	#endif
 
  private:
-	inline void swap(int16_t &a, int16_t &b) { int16_t t = a; a = b; b = t; }
+	//inline void swap(int16_t &a, int16_t &b) { int16_t t = a; a = b; b = t; }
 	void 		colorSpace(uint8_t cspace);
 	uint8_t		sleep;
 	void 		chipInit();
