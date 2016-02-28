@@ -16,9 +16,6 @@ https://github.com/sumotoy/RA8875/tree/0.70b11
 https://github.com/sumotoy/OLED_pictivaWide
 */
 
-#if !defined(_ILI9163_NEWFONTRENDER)
-  #error "you have to enable new LPGO rendering engine inside settings!"
-#endif
 
 
 #define __CS  10
