@@ -28,5 +28,15 @@ A0: RS<br>
 RESET: 10Kohm to +3V3<br>
 CS: SS<br>
 GND: GND<br>
-VCC: If you have a regulator on display connect to 5V
+VCC: If you have a regulator on display connect to 5V<br><br>
+
+<b>CPU's compatible:</b><br>
+- Teensy 3.0 (can use also alternative SPI pins!)
+- Teensy 3.1 (can use also alternative SPI pins!)
+- Teensy 3.2 (can use also alternative SPI pins!)
+- Teensy LC (can use also alternative SPI pins!)
+- Any arduino 8bit (UNO,etc.)
+- DUE
+- ESP8266
+- SPARK (from next version)
 
