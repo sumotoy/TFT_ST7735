@@ -2,7 +2,7 @@
 A fast driver that works with any Arduino 8 bit, AVR, DUE, Teensy's (all), ESP8266, SPARK
 
 This version it's completely recoded and it's almost equal to my very popular TFT_ILI9163C library, same features, same speed, same commands! It uses my LPGO Font rendering and it's fully SPI Transaction compatible (when applicable).
-This is the FIRST beta, only tested succesfully with Teensy 3.2 and a couple of commands are still missed (sleep for example).<br>
+This is the FIRST beta, only tested succesfully with Teensy 3.2.<br>
 
 <b>FEATURES:</b><br>
 - Very fast
@@ -38,5 +38,14 @@ VCC: If you have a regulator on display connect to 5V<br><br>
 - Any arduino 8bit (UNO,etc.)
 - DUE
 - ESP8266
-- SPARK (from next version)
+- SPARK (from next version)<br>
 
+<b>What about SD card holder:</b><br>
+I know you will ask so before run to solder and connect it please read this!<br>
+On 8 bit AVR you probably can use it but this only why you are running at very low SPI speed. With High speed CPU things are totally different, the chinese always solder resistors or (worst) capacitors on SD card holder, this cause problems in SPI bus and result are clear, SD most of the time not work and cause problems even on display side!<br>
+So what?<br>
+Buy a trusted high quality SD holder (not from chinese where High Quality it's still an unknown word) and connect very near CPU with smallest cable you can, SD have weak signal!<br>
+Do NOT trust SD card holder with level changer mounted on (sometime passed as high quality buffers!), these buffers/level converter destroy literally your SPI waveforms and cause many problems on SPI bus<br>
+The best SD holder has no resitors, capacitor (ok, just one on supply it's ok) or whatever.<br>
+Use always REAL branded SD cards and high speed ones (level 10 and up).<br>
+It's possible modify the one mounted on display? Probably yes, have to try, maybe I will write a wiki about it one day<br>
