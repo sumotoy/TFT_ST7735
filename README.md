@@ -1,6 +1,7 @@
 # TFT_ST7735
 A fast driver for ST7735 displays that works with Arduino's and Teensy's<br>
 ...Oh no! Another ST7735 library?<br><br>
+Look for a better version? Click here https://github.com/sumotoy/TFT_ST7735/tree/1.1b1<br><br>
 
 I'm actually using this library as playground for all my TFT libraries so I will transfer features when ready.<br>
 The goals are:<br>
