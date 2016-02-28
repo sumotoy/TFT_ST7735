@@ -72,7 +72,7 @@ int t = 0;
 
 void loop(void) {
   tft.scroll(t);
-  if (t > 160) {
+  if (t >= tft.width()) {
     t = 0;
   }
   else {

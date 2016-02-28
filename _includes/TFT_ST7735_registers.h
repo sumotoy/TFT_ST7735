@@ -14,8 +14,8 @@
 //#define CMD_GAMMASET 	0x26//Gamma Set (0x01[1],0x02[2],0x04[3],0x08[4])			---------
 #define CMD_DISPOFF 	0x28//Display OFF											
 #define CMD_DISPON  	0x29//Display ON											
-//#define CMD_IDLEON  	0x39//Idle Mode ON											---------
-//#define CMD_IDLEOF  	0x38//Idle Mode OFF											---------
+#define CMD_IDLEON  	0x39//Idle Mode ON											---------
+#define CMD_IDLEOF  	0x38//Idle Mode OFF											---------
 #define CMD_CLMADRS   	0x2A//Column Address Set									CMD_CASET
 #define CMD_PGEADRS   	0x2B//Page Address Set										CMD_RASET
 #define CMD_RAMWR   	0x2C//Memory Write											

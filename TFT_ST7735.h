@@ -169,16 +169,13 @@ class TFT_ST7735 : public Print {
     //------------------------------- CURSOR ----------------------------------------------------
 	void		setCursor(int16_t x,int16_t y);
 	void		getCursor(int16_t &x,int16_t &y);
-	//uint8_t		getCursorX(bool inColumns=false);//TBFIX
-	//uint8_t		getCursorY(bool inRows=false);//TBFIX
-	//uint8_t 		getMaxColumns(void);//TBFIX
-	//uint8_t 		getMaxRows(void);//TBFIX
+
 	//------------------------------- DISPLAY ----------------------------------------------------
 	uint8_t 	getErrorCode(void);
 	void		idleMode(boolean onOff);
 	void		display(boolean onOff);	
 	void		sleepMode(boolean mode);
-	void 		defineScrollArea(uint16_t tfa, uint16_t bfa);
+	void 		defineScrollArea(int16_t tfa, int16_t bfa);
 	void		scroll(uint16_t adrs);
 	#if !defined (SPI_HAS_TRANSACTION)
 	void 		setBitrate(uint32_t n);//will be deprecated

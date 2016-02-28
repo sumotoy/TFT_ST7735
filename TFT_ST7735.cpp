@@ -1,6 +1,43 @@
+
 #include "TFT_ST7735.h"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //constructors
+
+
+
+
 
 #if defined(__MK20DX128__) || defined(__MK20DX256__)//Teensy 3.0, Teensy 3.1
 	TFT_ST7735::TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin,const uint8_t mosi,const uint8_t sclk)
@@ -32,6 +69,23 @@
 #endif
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void TFT_ST7735::useBacklight(const uint8_t pin)
 {
 	_bklPin = pin;
@@ -39,10 +93,18 @@ void TFT_ST7735::useBacklight(const uint8_t pin)
 	digitalWrite(_bklPin,LOW);
 }
 
+
+
 void TFT_ST7735::backlight(bool state)
 {
 	if (_bklPin != 255) digitalWrite(_bklPin,!state);
 }
+
+
+
+
+
+
 
 //Arduino Uno, Leonardo, Mega, Teensy 2.0, etc
 #if defined(__AVR__)
@@ -53,6 +115,10 @@ void TFT_ST7735::backlight(bool state)
 			spiwrite(c);
 		endTransaction();
 	}
+
+
+
+
 
 	void TFT_ST7735::writedata(uint8_t c)
 	{
@@ -94,6 +160,8 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	}
 
+
+
 	void TFT_ST7735::writedata(uint8_t c)
 	{
 		startTransaction();
@@ -120,6 +188,7 @@ void TFT_ST7735::backlight(bool state)
 			}
 			SPI.setClockDivider(divider);
 	}
+
 	#endif
 #elif defined(__MKL26Z64__)//Teensy LC
 
@@ -131,6 +200,9 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	}
 
+
+
+
 	void TFT_ST7735::writedata(uint8_t c)
 	{
 		startTransaction();
@@ -140,6 +212,7 @@ void TFT_ST7735::backlight(bool state)
 	} 
 	
 
+
 	void TFT_ST7735::writedata16(uint16_t d)
 	{
 		startTransaction();
@@ -148,6 +221,7 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	} 
 	
+
 
 	#if !defined (SPI_HAS_TRANSACTION)
 	void TFT_ST7735::setBitrate(uint32_t n)
@@ -161,6 +235,12 @@ void TFT_ST7735::backlight(bool state)
 	{
 		//nop
 	}
+
+
+
+
+
+
 	#endif
 #else
 
@@ -173,6 +253,40 @@ void TFT_ST7735::backlight(bool state)
 	}
 
 	void TFT_ST7735::writedata(uint8_t c)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	{
 		startTransaction();
 			enableDataStream();
@@ -180,13 +294,57 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	} 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	void TFT_ST7735::writedata16(uint16_t d)
+
 	{
 		startTransaction();
 			enableDataStream();
 			spiwrite16(d);
 		endTransaction();
 	} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	#if !defined (SPI_HAS_TRANSACTION)
 	void TFT_ST7735::setBitrate(uint32_t n)
@@ -203,6 +361,55 @@ void TFT_ST7735::backlight(bool state)
 	}
 	#endif
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void TFT_ST7735::begin(bool avoidSPIinit) 
@@ -290,6 +497,10 @@ void TFT_ST7735::begin(bool avoidSPIinit)
 		if (!SPI.pinIsChipSelect(_cs)) {//ERROR
 			bitSet(_initError,1);
 			return;
+
+
+
+
 		}
 	}
 	#if defined(_TEENSYLC_FASTPORT)
@@ -571,11 +782,21 @@ void TFT_ST7735::chipInit() {
 		writecommand_cont(CMD_PGAMMAC);//Positive Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata8_cont(pGammaSet[i]);
+
+
+
+
 		}
 		
 		writecommand_cont(CMD_NGAMMAC);//Negative Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata8_cont(nGammaSet[i]);
+
+
+
+
+
+
 		}
 			delay(10);
 		#endif
@@ -593,6 +814,13 @@ void TFT_ST7735::chipInit() {
 		writecommand_cont(CMD_DISPON);//display ON 
 		delay(1);
 		writecommand_last(CMD_RAMWR);//Memory Write
+
+
+
+
+
+
+
 		
 		endTransaction();
 		delay(1);
@@ -749,15 +977,39 @@ void TFT_ST7735::chipInit() {
 			#error You must select at list one display type!
 		#endif
 
+
+
+
+
+
+
+
 		#if defined(__GAMMASET1) || defined(__GAMMASET2) || defined(__GAMMASET3)
 		writecommand(CMD_PGAMMAC);//Positive Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata(pGammaSet[i]);
+
+
+
+
+
+
 		}
+
+
+
+
+
+
+
+
 		
 		writecommand(CMD_NGAMMAC);//Negative Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata(nGammaSet[i]);
+
+
+
 		}
 			delay(10);
 		#endif
@@ -821,7 +1073,7 @@ void TFT_ST7735::display(boolean onOff) {
 	}
 }
 
-/*
+
 void TFT_ST7735::idleMode(boolean onOff) {
 	if (onOff){
 		#if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -843,7 +1095,7 @@ void TFT_ST7735::idleMode(boolean onOff) {
 		backlight(1);
 	}
 }
-*/
+
 
 void TFT_ST7735::sleepMode(boolean mode) {
 	if (mode){
@@ -873,9 +1125,17 @@ void TFT_ST7735::sleepMode(boolean mode) {
 	}
 }
 
-void TFT_ST7735::defineScrollArea(uint16_t tfa, uint16_t bfa){
-    tfa += __ROFFSET;
-    int16_t vsa = _TFTHEIGHT - tfa - bfa;
+void TFT_ST7735::defineScrollArea(int16_t tfa, int16_t bfa){
+	int16_t vsa;
+	if (_portrait){
+		swap(tfa,bfa);
+		tfa += __ROFFSET;
+		vsa = _TFTWIDTH - tfa - bfa;
+	} else {
+		tfa += __COFFSET;
+		vsa = _TFTHEIGHT - tfa - bfa;
+	}
+	
     if (vsa >= 0) {
 		#if defined(__MK20DX128__) || defined(__MK20DX256__)
 			startTransaction();
@@ -910,19 +1170,44 @@ void TFT_ST7735::scroll(uint16_t adrs) {
 //fast
 void TFT_ST7735::fillScreen(uint16_t color) {
 	int16_t px;
+
+
+
+
 	
 	startTransaction();
+
+
+
+
+
+
+
+
 	
 	setAddrWindow_cont(0x00,0x00,_TFTWIDTH,_TFTHEIGHT);
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)
 		for (px = 0;px < _GRAMSIZE; px++){
 			writedata16_cont(color);	
+
+
+
+
+
+
 		}
 		writecommand_last(CMD_NOP);
 	#else
 		enableDataStream();
 		for (px = 0;px < _GRAMSIZE; px++){ 
 			spiwrite16(color); 
+
+
+
+
+
+
+
 		}
 	#endif
 	endTransaction();
@@ -1238,6 +1523,9 @@ void TFT_ST7735::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t c
 	if (((y + h) - 1) >= _height) h = _height - y;
 	startTransaction();
 	fillRect_cont(x,y,w,h,color);
+
+
+
 	endTransaction();
 }
 
@@ -1271,9 +1559,16 @@ void TFT_ST7735::fillRect_cont(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 			writedata16_last(color);
 		#else
 			spiwrite16(color);
+
+
+
+
+
 			#if defined(ESP8266)   	
 				yield(); 	
 			#endif
+
+
 		#endif
 	}
 }
@@ -1292,6 +1587,9 @@ void TFT_ST7735::drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_
 	endTransaction();
 }
 
+
+
+
 void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color)
 {
 	if (y0 == y1) {
@@ -1299,15 +1597,28 @@ void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, ui
 			drawFastHLine_cont(x0, y0, x1 - x0 + 1, color);
 		} else if (x1 < x0) {
 			drawFastHLine_cont(x1, y0, x0 - x1 + 1, color);
+
+
+
+
 		} else {
 			drawPixel_cont(x0, y0, color);
+
+
 		}
 		return;
 	} else if (x0 == x1) {
 		if (y1 > y0) {
 			drawFastVLine_cont(x0, y0, y1 - y0 + 1, color);
+
+
+
+
+
 		} else {
 			drawFastVLine_cont(x0, y1, y0 - y1 + 1, color);
+
+
 		}
 		return;
 	}
@@ -1343,6 +1654,17 @@ void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, ui
 				xbegin = x0 + 1;
 				y0 += ystep;
 				err += dx;
+
+
+
+
+
+
+
+
+
+
+
 			}
 			#if defined(ESP8266)   	
 				yield(); 	
@@ -1362,6 +1684,16 @@ void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, ui
 				xbegin = x0 + 1;
 				y0 += ystep;
 				err += dx;
+
+
+
+
+
+
+
+
+
+
 			}
 			#if defined(ESP8266)   	
 				yield(); 	
@@ -1376,6 +1708,7 @@ void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, ui
 draw rect
 */
 void TFT_ST7735::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color){
+
 	startTransaction();
 		drawFastHLine_cont(x, y, w, color);
 		drawFastHLine_cont(x, (y+h)-1, w, color);
@@ -1497,6 +1830,9 @@ void TFT_ST7735::drawArcHelper(uint16_t cx, uint16_t cy, uint16_t radius, uint16
 						// we validated that the probable end of the lower line has a pixel, continue with pixel by pixel search, in most cases next loop with confirm the end of lower line as it will not find a valid pixel
 						y2EndSearching = true;
 					}
+
+
+
 				} else {
 					if (y1StartFound && !y1EndFound) {//higher line end found
 						y1EndFound = true;
@@ -1519,6 +1855,7 @@ void TFT_ST7735::drawArcHelper(uint16_t cx, uint16_t cy, uint16_t radius, uint16
 							y2EndSearching = true;
 						}
 					}
+
 				}
 			}
 			if (y1StartFound && !y1EndFound){
@@ -1530,6 +1867,10 @@ void TFT_ST7735::drawArcHelper(uint16_t cx, uint16_t cy, uint16_t radius, uint16
 			}
 			#if defined(ESP8266)   	
 				yield(); 	
+
+
+
+
 			#endif
 		}
 		#if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -1587,6 +1928,18 @@ void TFT_ST7735::drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiu
 			stoppingX -= twoBSquare;
 			ellipseError += xchange;
 			xchange += twoBSquare;
+
+
+
+
+
+
+
+
+
+
+
+
 		}
 		#if defined(ESP8266)   	
 			yield(); 	
@@ -1610,6 +1963,17 @@ void TFT_ST7735::drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiu
 			stoppingY -= twoASquare;
 			ellipseError += ychange;
 			ychange += twoASquare;
+
+
+
+
+
+
+
+
+
+
+
 		}
 		#if defined(ESP8266)   	
 			yield(); 	
@@ -1640,6 +2004,9 @@ void TFT_ST7735::drawCircle(int16_t cx, int16_t cy, int16_t radius, uint16_t col
 			--x;
 			error -= x;
 			error -= x;
+
+
+
 		}
 	}
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)	
@@ -1722,6 +2089,8 @@ void TFT_ST7735::fillQuad(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t 
 }
 
 void TFT_ST7735::drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diameter, float rot, uint16_t color)
+
+
 { 
 	sides = (sides > 2? sides : 3);
 	float dtr = (PI/180.0) + PI;
@@ -1743,6 +2112,8 @@ void TFT_ST7735::drawPolygon(int16_t cx, int16_t cy, uint8_t sides, int16_t diam
 }
 
 void TFT_ST7735::drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+
+
 {
 	if (boundaryCheck(x,y)) return;
 	if (((x + w) - 1) >= _width)  w = _width  - x;
@@ -1756,6 +2127,9 @@ void TFT_ST7735::drawMesh(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t c
 	for (m = y; m <= h; m += 2) {
 		for (n = x; n <= w; n += 2) {
 			drawPixel_cont(n, m, color);
+
+
+
 		}
 	}
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)	
@@ -1788,6 +2162,8 @@ void TFT_ST7735::fillTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int1
 }
 
 void TFT_ST7735::fillTriangle_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color) 
+
+
 {
 	int16_t a, b, y, last;
 
@@ -1801,11 +2177,19 @@ void TFT_ST7735::fillTriangle_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1
 			a = x1;
 		} else if (x1 > b) {
 			b = x1;
+
+
+
 		}
 		if (x2 < a){
 			a = x2;
 		} else if (x2 > b) {
 			b = x2;
+
+
+
+
+
 		}
 		drawFastHLine_cont(a, y0, b-a+1, color);
 		return;
@@ -1866,11 +2250,23 @@ void TFT_ST7735::drawCircle_cont(int16_t x0,int16_t y0,int16_t r,uint8_t cornern
 	int16_t ddF_y = -2 * r;
 	int16_t x     = 0;
 	int16_t y     = r;
+
+
+
+
+
+
+
+
+
+
 	while (x<y) {
 		if (f >= 0) {
 			y--;
 			ddF_y += 2;
 			f     += ddF_y;
+
+
 		}
 		x++;
 		ddF_x += 2;
@@ -1882,14 +2278,26 @@ void TFT_ST7735::drawCircle_cont(int16_t x0,int16_t y0,int16_t r,uint8_t cornern
 		if (cornername & 0x2) {
 			drawPixel_cont(x0 + x, y0 - y, color);
 			drawPixel_cont(x0 + y, y0 - x, color);
+
+
+
+
 		}
 		if (cornername & 0x8) {
 			drawPixel_cont(x0 - y, y0 + x, color);
 			drawPixel_cont(x0 - x, y0 + y, color);
+
+
+
+
 		}
 		if (cornername & 0x1) {
 			drawPixel_cont(x0 - y, y0 - x, color);
 			drawPixel_cont(x0 - x, y0 - y, color);
+
+
+
+
 		}
 		#if defined(ESP8266)   	
 			yield(); 	
@@ -1911,6 +2319,10 @@ void TFT_ST7735::fillCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t corn
 			y--;
 			ddF_y += 2;
 			f     += ddF_y;
+
+
+
+
 		}
 		x++;
 		ddF_x += 2;
@@ -1919,10 +2331,21 @@ void TFT_ST7735::fillCircle_cont(int16_t x0, int16_t y0, int16_t r, uint8_t corn
 		if (cornername & 0x1) {
 			drawFastVLine_cont(x0+x, y0-y, 2*y+1+delta, color);
 			drawFastVLine_cont(x0+y, y0-x, 2*x+1+delta, color);
+
+
+
+
+
+
 		}
 		if (cornername & 0x2) {
 			drawFastVLine_cont(x0-x, y0-y, 2*y+1+delta, color);
 			drawFastVLine_cont(x0-y, y0-x, 2*x+1+delta, color);
+
+
+
+
+
 		}
 		#if defined(ESP8266)   	
 			yield(); 	
@@ -2087,10 +2510,35 @@ void TFT_ST7735::ringMeter(int val, int minV, int maxV, uint8_t x, uint8_t y, ui
 			default:
 				if (colorScheme > 9){
 					colour = colorScheme;
+
+
+
+
+
+
+
 				} else {
 					colour = BLUE;
+
+
 				}
 				break; // Fixed colour
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		}
 		// Calculate pair of coordinates for segment start
 		float xStart = cos((i - 90) * 0.0174532925);
@@ -2112,6 +2560,10 @@ void TFT_ST7735::ringMeter(int val, int minV, int maxV, uint8_t x, uint8_t y, ui
 			fillQuad(x0, y0, x1, y1, x2, y2, x3, y3, colour, false);
 		} else {// Fill in blank segments
 			fillQuad(x0, y0, x1, y1, x2, y2, x3, y3, backSegColor, false);
+
+
+
+
 		}
 	}
 
@@ -2124,17 +2576,46 @@ void TFT_ST7735::ringMeter(int val, int minV, int maxV, uint8_t x, uint8_t y, ui
 		} else {
 			fillCurve(x, y + getFontHeight() / 2, r - w, r - w, 1, _backColor);
 			fillCurve(x, y + getFontHeight() / 2, r - w, r - w, 2, _backColor);
+
+
+
+
+
 		}
 		//prepare for write text
 		if (r > 84) {
 			setFontScale(1);
 		} else {
 			setFontScale(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		}
 		if (_portrait){
 			setCursor(y, x - 15, true);
 		} else {
 			setCursor(x - 15, y, true);
+
+
+
+
+
 		}
 		print(val);
 		print(" ");
@@ -2176,6 +2657,13 @@ void TFT_ST7735::pushColor(uint16_t color) {
 		startTransaction();
 		writedata16_last(color);
 		endTransaction();
+
+
+
+
+
+
+
 	#else
 		writedata16(color);
 	#endif
@@ -2189,6 +2677,11 @@ void TFT_ST7735::drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, con
 	if (w > 1 || h < 1) return;
 	int16_t px;
 	uint16_t color;
+
+
+
+
+
 	
 	startTransaction();
 	setAddrWindow_cont(x,y,w + x,h + y);//constrain window
@@ -2196,21 +2689,33 @@ void TFT_ST7735::drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, con
 		enableCommandStream();
 		spiwrite(CMD_RAMWR);
 		enableDataStream();
+
+
+
+
+
 	#else
 		writecommand_cont(CMD_RAMWR);//ram write
+
 	#endif
 	for (px = 0;px < w*h; px++){//loop trough pixels
 		if (true24){
 			color = Color24To565(bitmap[px]);//24 bit
 		} else {
 			color = bitmap[px];//18 bit
+
+
 		}
 		#if defined(__MK20DX128__) || defined(__MK20DX256__)
 			writedata16_cont(color);
 		#else
 			spiwrite16(color);
+
+
+
 			#if defined(ESP8266)   	
 				yield(); 	
+
 			#endif
 		#endif
 	}
@@ -2243,6 +2748,11 @@ void TFT_ST7735::drawBitmap(int16_t x, int16_t y,const uint8_t *bitmap, int16_t 
 				drawPixel(x+i, y+j, color);
 			} else {
 				drawPixel(x+i, y+j, bg);
+
+
+
+
+
 		}
     }
 	#if defined(ESP8266)   	
@@ -2296,6 +2806,8 @@ int TFT_ST7735::_STRlen_helper(const char* buffer,int len)
 			} else if (buffer[i] != 13 && buffer[i] != 10 && buffer[i] != 32){//avoid special char
 				charIndex = _getCharCode(buffer[i]);
 				if (charIndex > -1) {		//found!
+
+
 					#if defined(_FORCE_PROGMEM__)
 						//totW += (PROGMEM_get(&_currentFont->chars[charIndex].image->image_width));
 						totW += (pgm_read_byte(&(_currentFont->chars[charIndex].image->image_width)));
@@ -2329,6 +2841,12 @@ void TFT_ST7735::setFont(const tFont *font)
 				_spaceCharWidth = pgm_read_byte(&(_currentFont->chars[temp].image->image_width));
 			#else
 				_spaceCharWidth = (_currentFont->chars[temp].image->image_width);
+
+
+
+
+
+
 			#endif
 		} else {
 			//font malformed, doesn't have needed space parameter
@@ -2353,6 +2871,16 @@ void TFT_ST7735::_textWrite(const char* buffer, uint16_t len)
 		if (_renderSingleChar(buffer[i])) {
 			//aha! in that case I have to break out!
 			break;
+
+
+
+
+
+
+
+
+
+
 		}
 		/*
 	#if defined(ESP8266)   	
@@ -2390,6 +2918,11 @@ bool TFT_ST7735::_renderSingleChar(const char c)
 			if (_cursorX + borderBottom  > _width) return 1;//too high!
 			_cursorX += borderBottom;
 			_cursorY = 0;
+
+
+
+
+
 		}
 		return 0;
 	} else if (c == 32){//--------------------------- SPACE (detected) -----------------------
@@ -2403,6 +2936,13 @@ bool TFT_ST7735::_renderSingleChar(const char c)
 					(_fontHeight * _textScaleY),
 					_textBackground
 				);
+
+
+
+
+
+
+
 			}
 			_cursorX += borderRight;
 			return 0;
@@ -2416,6 +2956,13 @@ bool TFT_ST7735::_renderSingleChar(const char c)
 					(_fontHeight * _textScaleX),
 					_textBackground
 				);
+
+
+
+
+
+
+
 			}
 			_cursorY += borderRight;
 			return 0;
@@ -2431,6 +2978,11 @@ bool TFT_ST7735::_renderSingleChar(const char c)
 				//PROGMEM_read(&_currentFont->chars[charIndex].image->image_width,charW);
 			#else
 				charW = _currentFont->chars[charIndex].image->image_width;
+
+
+
+
+
 			#endif
 			//---------------------------------- WRAP is ON? --------------------------------
 			if (_textWrap){//wrap, goes in the new line 
@@ -2452,15 +3004,54 @@ bool TFT_ST7735::_renderSingleChar(const char c)
 			if (!_portrait){
 				if (_cursorY + (_fontHeight * _textScaleY) > _height) return 1;//too high!
 				_glyphRender_unc(_cursorX,_cursorY,charW,_textScaleX,_textScaleY,charIndex);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			} else {
 				if (_cursorX + (_fontHeight * _textScaleX) > _width) return 1;//too high!
 				_glyphRender_unc(_cursorY,_cursorX,charW,_textScaleY,_textScaleX,charIndex);
+
+
 			}
 			//add charW to total -----------------------------------------------------
 			if (!_portrait){
 				_cursorX += (charW * _textScaleX) + (_charSpacing * _textScaleX);
+
+
+
+
+
+
 			} else {
 				_cursorY += (charW * _textScaleX) + (_charSpacing * _textScaleY);
+
+
 			}
 			return 0;
 		}//end valid
@@ -2551,6 +3142,8 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 			lineBuffer[currentXposition] = bitRead(temp,i);//continue fill line buffer
 			lineChecksum += lineBuffer[currentXposition++];
 			//currentXposition++;
+
+
 		}
 		currentByte++;
 	}
@@ -2560,12 +3153,16 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 	//but it's visible when backgound it's on, so this small piece of code fix the problem
 	
 	if (_textForeground != _textBackground && currentYposition < _fontHeight) {
+
+
+
 		fillRect_cont(
 			x,
 			y + (currentYposition * scaleY),
 			(charW * scaleX) + (_charSpacing * scaleX), //now handle _charSpacing!
 			(_fontHeight - currentYposition) * scaleY,
 			_textBackground
+
 		);
 	}
 	
@@ -2619,8 +3216,47 @@ void TFT_ST7735::_charLineRender(bool lineBuffer[],int charW,int16_t x,int16_t y
 				endPix = 0;
 				break;//exit cycle for...
 			}
+
+
+
+
+
 		}
 	}//while
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
