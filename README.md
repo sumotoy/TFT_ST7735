@@ -42,10 +42,10 @@ VCC: If you have a regulator on display connect to 5V<br><br>
 
 <b>What about SD card holder:</b><br>
 I know you will ask so before run to solder and connect it please read this!<br>
-On 8 bit AVR you probably can use it but this only why you are running at very low SPI speed. With High speed CPU things are totally different, the chinese always solder resistors or (worst) capacitors on SD card holder, this cause problems in SPI bus and result are clear, SD most of the time not work and cause problems even on display side!<br>
+On 8 bit AVR you probably can use it but this only because you are running at very low SPI speed. With High speed CPU things are totally different, the chinese vendor always solder resistors or (worst) capacitors on SD card holder SPI lines, this cause problems in the SPI bus and result are unexpected, SD most of the time don't work and cause problems even on display side!<br>
 So what?<br>
 Buy a trusted high quality SD holder (not from chinese where High Quality it's still an unknown word) and connect very near CPU with smallest cable you can, SD have weak signal!<br>
-Do NOT trust SD card holder with level changer mounted on (sometime passed as high quality buffers!), these buffers/level converter destroy literally your SPI waveforms and cause many problems on SPI bus<br>
+Do NOT trust SD card holder with level changer chip mounted on (sometime passed as high quality buffers!), these buffers/level converter destroy literally your SPI waveforms and cause many problems on SPI bus, they are designed for slow AVR<br>
 The best SD holder has no resitors, capacitor (ok, just one on supply it's ok) or whatever.<br>
 Use always REAL branded SD cards and high speed ones (level 10 and up).<br>
-It's possible modify the one mounted on display? Probably yes, have to try, maybe I will write a wiki about it one day<br>
+It's possible modify the SD holder mounted on display? Probably yes, have to try, maybe I will write a wiki about it one day<br>
