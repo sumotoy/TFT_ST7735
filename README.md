@@ -15,8 +15,8 @@ This is the FIRST beta, only tested succesfully with Teensy 3.2.<br>
 
 <b>About Display and connections:</b><br>
 My display it's 1.8" 128*160 buy from ebay, RED pcb and has a SD card (that needssome modification if you want to use with Hi speed SPI or never work!).<br>
-My display has 3v3 regulator onboard and works at 5V but every other connection it's at 3V3! You are warned! Never connect directly to Arduino or any 5V CPU or you will destroy it! You need a Level Converter like CD4050.<br>
-The Backlight led need a resistor, I've used a 150R connected to 5V but you need to be sure about yours or you will destry the backlight and your screen will not be useable.<br>
+My display has 3v3 regulator onboard and works at 5V but signal level are still at 3V3! You are warned! Never connect directly to Arduino or any 5V CPU or you will destroy it! You need a Level Converter chip like CD4050.<br>
+The Backlight led need a resistor, I've used a 150R connected to 5V but you need to be sure about yours or you will destroy the backlight and your screen will not be useable so pay EXTRA ATTENTION TO THIS!!!<br>
 The RST it's optional, I've connected trough a 10K resistor to +3v3.<br><br>
 
 <b>Connections:</b><br>
