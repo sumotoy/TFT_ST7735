@@ -47,11 +47,12 @@
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Version:
 	1.1b1: Completely redone, now similar to TFT_ILI9136C code.ame commands
-	
+	1.1b3: Tested and works with ES8266
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	BugList of the current version:
 	
 	Please report any!
+	Enjoy!!!
 
 */
 #ifndef _TFT_ST7735LIB_H_
@@ -169,7 +170,10 @@ class TFT_ST7735 : public Print {
     //------------------------------- CURSOR ----------------------------------------------------
 	void		setCursor(int16_t x,int16_t y);
 	void		getCursor(int16_t &x,int16_t &y);
-
+	//uint8_t		getCursorX(bool inColumns=false);//TBFIX
+	//uint8_t		getCursorY(bool inRows=false);//TBFIX
+	//uint8_t 		getMaxColumns(void);//TBFIX
+	//uint8_t 		getMaxRows(void);//TBFIX
 	//------------------------------- DISPLAY ----------------------------------------------------
 	uint8_t 	getErrorCode(void);
 	void		idleMode(boolean onOff);

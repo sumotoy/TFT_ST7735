@@ -39,13 +39,10 @@ void TFT_ST7735::useBacklight(const uint8_t pin)
 	digitalWrite(_bklPin,LOW);
 }
 
-
-
 void TFT_ST7735::backlight(bool state)
 {
 	if (_bklPin != 255) digitalWrite(_bklPin,!state);
 }
-
 
 //Arduino Uno, Leonardo, Mega, Teensy 2.0, etc
 #if defined(__AVR__)
@@ -56,7 +53,6 @@ void TFT_ST7735::backlight(bool state)
 			spiwrite(c);
 		endTransaction();
 	}
-
 
 	void TFT_ST7735::writedata(uint8_t c)
 	{
@@ -98,7 +94,6 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	}
 
-
 	void TFT_ST7735::writedata(uint8_t c)
 	{
 		startTransaction();
@@ -125,7 +120,6 @@ void TFT_ST7735::backlight(bool state)
 			}
 			SPI.setClockDivider(divider);
 	}
-
 	#endif
 #elif defined(__MKL26Z64__)//Teensy LC
 
@@ -153,6 +147,7 @@ void TFT_ST7735::backlight(bool state)
 		endTransaction();
 	} 
 	
+
 	#if !defined (SPI_HAS_TRANSACTION)
 	void TFT_ST7735::setBitrate(uint32_t n)
 	{
@@ -185,7 +180,6 @@ void TFT_ST7735::backlight(bool state)
 	} 
 
 	void TFT_ST7735::writedata16(uint16_t d)
-
 	{
 		startTransaction();
 			enableDataStream();
@@ -340,9 +334,9 @@ void TFT_ST7735::begin(bool avoidSPIinit)
 		SPI.setBitOrder(MSBFIRST);
 		SPI.setDataMode(SPI_MODE0);
 	#else
-		ST7735_SPI = SPISettings(_ESP8266MAXSPISPEED, MSBFIRST, SPI_MODE0);
+		ST7735_SPI = SPISettings(_ST7735_maxSPIspeed, MSBFIRST, SPI_MODE0);
 	#endif
-	#if defined(ESP8266) && defined(_ESP8266_STANDARDMODE)
+	#if defined(_ESP8266_STANDARDMODE)
 		digitalWrite(_cs,HIGH);
 	#else
 		GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, _pinRegister(_cs));//H
@@ -410,11 +404,11 @@ uint8_t TFT_ST7735::getErrorCode(void)
 	return _initError;
 }
 
-//Initializations
 void TFT_ST7735::chipInit() {
 	uint8_t i;
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)
 		startTransaction();
+		
 		writecommand_cont(CMD_SWRESET);//software reset
 		delay(130);
 		writecommand_cont(CMD_SLPOUT);//exit sleep
@@ -571,6 +565,7 @@ void TFT_ST7735::chipInit() {
 		for (i=0;i<17;i++){
 			writedata8_cont(pGammaSet[i]);
 		}
+		
 		writecommand_cont(CMD_NGAMMAC);//Negative Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata8_cont(nGammaSet[i]);
@@ -580,12 +575,17 @@ void TFT_ST7735::chipInit() {
 		writecommand_cont(CMD_NORML);
 		writecommand_last(CMD_NOP);
 		endTransaction();
+		
 		colorSpace(_colorspaceData);
+		
 		setRotation(0);
+		
 		startTransaction();
+		
 		writecommand_cont(CMD_DISPON);//display ON 
 		delay(1);
 		writecommand_last(CMD_RAMWR);//Memory Write
+		
 		endTransaction();
 		delay(1);
 	#else
@@ -746,6 +746,7 @@ void TFT_ST7735::chipInit() {
 		for (i=0;i<17;i++){
 			writedata(pGammaSet[i]);
 		}
+		
 		writecommand(CMD_NGAMMAC);//Negative Gamma Correction Setting
 		for (i=0;i<17;i++){
 			writedata(nGammaSet[i]);
@@ -754,10 +755,12 @@ void TFT_ST7735::chipInit() {
 		#endif
 		writecommand(CMD_NORML);
 		colorSpace(_colorspaceData);
+		
 		setRotation(0);
 		writecommand(CMD_DISPON);//display ON 
 		delay(1);
 		writecommand(CMD_RAMWR);//Memory Write
+		
 		delay(1);
 	#endif
 	backlight(1);
@@ -905,6 +908,7 @@ void TFT_ST7735::scroll(uint16_t adrs) {
 //fast
 void TFT_ST7735::fillScreen(uint16_t color) {
 	int16_t px;
+	
 	startTransaction();
 	setAddrWindow_cont(0x00,0x00,_TFTWIDTH,_TFTHEIGHT);
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -1025,7 +1029,47 @@ uint16_t TFT_ST7735::colorInterpolation(uint8_t r1,uint8_t g1,uint8_t b1,uint8_t
 	);
 }
 
+/*
+uint8_t TFT_ST7735::getMaxColumns(void) 
+{
+	return 0;
+}
 
+uint8_t TFT_ST7735::getMaxRows(void) 
+{
+		if (!_portrait){
+			return (uint8_t)(_height / (_fontHeight*_textScaleY) + _fontInterline);
+		} else {
+			return (uint8_t)(_width / (_fontHeight*_textScaleX) + _fontInterline);
+		}
+
+}
+
+uint8_t TFT_ST7735::getCursorX(bool inColumns) 
+{
+	if (!inColumns){
+		return _cursorX;
+	} else {
+
+		return _cursorX;
+	}
+}
+
+uint8_t TFT_ST7735::getCursorY(bool inRows) 
+{
+	if (!inRows){
+		return _cursorY;
+	} else {
+		uint8_t maxRows = getMaxRows();
+			if (!_portrait){
+				return (uint8_t)(maxRows - (_height / _cursorY));
+			} else {
+				return (uint8_t)_width / (_fontHeight*_textScaleX) + _fontInterline;
+			}
+
+	}
+}
+*/
 
 //fast
 void TFT_ST7735::drawPixel(int16_t x, int16_t y, uint16_t color) 
@@ -1147,6 +1191,7 @@ void TFT_ST7735::setRotation(uint8_t m) {
 		_portrait = true;
 	}
 	colorSpace(_colorspaceData);
+	
 	startTransaction();
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)
 		writecommand_cont(CMD_MADCTL);
@@ -1283,7 +1328,6 @@ void TFT_ST7735::drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_
 	#endif
 	endTransaction();
 }
-
 
 void TFT_ST7735::drawLine_cont(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color)
 {
@@ -1549,6 +1593,26 @@ void TFT_ST7735::setArcParams(float arcAngleMax, int arcAngleOffset)
 	_arcAngleOffset = arcAngleOffset;
 }
 
+/*
+void TFT_ST7735::drawPie(int16_t x, int16_t y, int16_t r, int16_t rs, int16_t re,uint16_t color)
+{
+	int16_t px, py, cx, cy, d;
+	rs -= 90;
+	re   -= 90;
+	if (rs>re) rs -= 360;
+	px = x + cos((rs*3.14)/180) * r;
+	py = y + sin((rs*3.14)/180) * r;
+	drawLine(x, y, px, py,color);
+	for (d=rs+1; d<re+1; d++){
+		cx = x + cos((d*3.14)/180) * r;
+		cy = y + sin((d*3.14)/180) * r;
+		drawLine(px, py, cx, cy,color);
+		px = cx;
+		py = cy;
+	}
+	drawLine(x, y, px, py,color);
+}
+*/
 
 //fast
 void TFT_ST7735::drawEllipse(int16_t cx,int16_t cy,int16_t radiusW,int16_t radiusH,uint16_t color)
@@ -2183,6 +2247,7 @@ void TFT_ST7735::drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, con
 	if (w > 1 || h < 1) return;
 	int16_t px;
 	uint16_t color;
+	
 	startTransaction();
 	setAddrWindow_cont(x,y,w + x,h + y);//constrain window
 	#if !defined(__MK20DX128__) && !defined(__MK20DX256__)
@@ -2204,7 +2269,6 @@ void TFT_ST7735::drawColorBitmap(int16_t x, int16_t y, int16_t w, int16_t h, con
 			spiwrite16(color);
 			#if defined(ESP8266)   	
 				yield(); 	
-
 			#endif
 		#endif
 	}
@@ -2290,8 +2354,6 @@ int TFT_ST7735::_STRlen_helper(const char* buffer,int len)
 			} else if (buffer[i] != 13 && buffer[i] != 10 && buffer[i] != 32){//avoid special char
 				charIndex = _getCharCode(buffer[i]);
 				if (charIndex > -1) {		//found!
-
-
 					#if defined(_FORCE_PROGMEM__)
 						//totW += (PROGMEM_get(&_currentFont->chars[charIndex].image->image_width));
 						totW += (pgm_read_byte(&(_currentFont->chars[charIndex].image->image_width)));
@@ -2519,6 +2581,7 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 								scaleY,
 								_textBackground
 							);
+						
 					}
 				} else if (lineChecksum == charW){//full line
 					fillRect_cont(
@@ -2545,7 +2608,7 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 			//-------------------------------------------------------
 			lineBuffer[currentXposition] = bitRead(temp,i);//continue fill line buffer
 			lineChecksum += lineBuffer[currentXposition++];
-			//currentXposition++
+			//currentXposition++;
 		}
 		currentByte++;
 	}
@@ -2553,6 +2616,7 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 	//For some reason some glyph missed one blank line, this happen rarely and I really don't know
 	//why (I suppose it's font converter issue), this is not a problem when no background it's needed
 	//but it's visible when backgound it's on, so this small piece of code fix the problem
+	
 	if (_textForeground != _textBackground && currentYposition < _fontHeight) {
 		fillRect_cont(
 			x,
@@ -2562,6 +2626,7 @@ void TFT_ST7735::_glyphRender_unc(int16_t x,int16_t y,int charW,uint8_t scaleX,u
 			_textBackground
 		);
 	}
+	
 }
 
 /*
