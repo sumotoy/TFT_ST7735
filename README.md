@@ -1,4 +1,5 @@
 # TFT_ST7735
+<b>ATTENTION!</b> Current version not working with ESP8266, I will fix this in some hours! Sorry, this time I was too fast to release a new version and I trusted my code too much, sigh.<br><br>
 A fast driver that works with any Arduino 8 bit, AVR, DUE, Teensy's (all), ESP8266, SPARK
 
 This version it's completely recoded and it's almost equal to my very popular TFT_ILI9163C library, same features, same speed, same commands! It uses my LPGO Font rendering and it's fully SPI Transaction compatible (when applicable).
