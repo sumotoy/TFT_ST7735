@@ -1,0 +1,12 @@
+{
+  "name": "TFT_ST7735",
+  "keywords": "display, spi, tft",
+  "description": "ST7735 display driver",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/sumotoy/TFT_ST7735/tree/1.0p1"
+  },
+  "frameworks": "arduino",
+  "platforms": "*"
+}
