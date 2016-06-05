@@ -21,7 +21,7 @@ static const uint8_t CMD_PGEADRS   	= 0x2B;//Page Address Set								_CMD_PASET
 
 static const uint8_t CMD_RAMWR   	= 0x2C;//Memory Write
 static const uint8_t CMD_RAMRD   	= 0x2E;//Memory Read
-//static const uint8_t CMD_CLRSPACE  	= 0x2D;//Color Space : 4K/65K/262K						**********
+
 static const uint8_t CMD_PARTAREA	= 0x30;//Partial Area									_CMD_PTLAR
 static const uint8_t CMD_VSCLLDEF	= 0x33;//Vertical Scroll Definition						_CMD_VSCRLLD
 static const uint8_t CMD_TEFXLON	= 0x35;//Tearing Effect Line ON							_CMD_TEFXON
@@ -29,32 +29,13 @@ static const uint8_t CMD_TEFXLOF	= 0x34;//Tearing Effect Line OFF						_CMD_TEFX
 static const uint8_t CMD_MADCTL  	= 0x36;//Memory Access Control
 static const uint8_t CMD_VSSTADRS	= 0x37;//Vertical Scrolling Start address				_CMD_VSCLLSA
 static const uint8_t CMD_PIXFMT  	= 0x3A;//Interface Pixel Format
-/*
-static const uint8_t CMD_WRMEMCON  	= 0x3C;//Write Memory Continue							>>> NEW <<<<
-static const uint8_t CMD_TEARSCN  	= 0x44;//Set Tear Scanline								>>> NEW <<<<
-static const uint8_t CMD_WDBRIGHT  	= 0x51;//Write Display Brightness						>>> NEW <<<<
-static const uint8_t CMD_WCTRLDIS  	= 0x53;///Write CTRL Display 							>>> NEW <<<<
-static const uint8_t CMD_WCABRGCTRL = 0x55;///Write Content Adaptive Brightness Control 	>>> NEW <<<<
-static const uint8_t CMD_WCABCMBRG	= 0x5E;///Write CABC Minimum Brightness				 	>>> NEW <<<<
-static const uint8_t CMD_RGBINTSC	= 0xB0;///RGB Interface Signal Control				 	>>> NEW <<<<
-*/
+
 static const uint8_t CMD_FRMCTR1 	= 0xB1;//Frame Rate Control (In normal mode/Full colors)
 static const uint8_t CMD_FRMCTR2 	= 0xB2;//Frame Rate Control(In Idle mode/8-colors)
 static const uint8_t CMD_FRMCTR3 	= 0xB3;//Frame Rate Control(In Partial mode/full colors)
 static const uint8_t CMD_DINVCTR	= 0xB4;//Display Inversion Control						_CMD_INVCTR
-//static const uint8_t CMD_RGBBLK		= 0xB5;//RGB Interface Blanking Porch setting			_CMD_BLKPC
 static const uint8_t CMD_DFUNCTR 	= 0xB6;//Display Fuction set 5
-//static const uint8_t CMD_SDRVDIR 	= 0xB7;//Source Driver Direction Control				_CMD_ENTMSET
-//static const uint8_t CMD_GDRVDIR 	= 0xB8;//Gate Driver Direction Control 					_CMD_BKLGCTRL1 Backlight Control 1
-/*
-static const uint8_t CMD_BKLGCTRL2 	= 0xB9;///Backlight Control 2							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL3 	= 0xBA;///Backlight Control 3							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL4 	= 0xBB;///Backlight Control 4							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL5 	= 0xBC;///Backlight Control 5							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL6 	= 0xBD;///Backlight Control 6							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL7 	= 0xBE;///Backlight Control 7							>>> NEW <<<<
-static const uint8_t CMD_BKLGCTRL8 	= 0xBF;///Backlight Control 7							>>> NEW <<<<
-*/
+
 static const uint8_t CMD_PWCTR1  	= 0xC0;//Power_Control1
 static const uint8_t CMD_PWCTR2  	= 0xC1;//Power_Control2
 static const uint8_t CMD_PWCTR3  	= 0xC2;//Power_Control3
@@ -63,13 +44,9 @@ static const uint8_t CMD_PWCTR5  	= 0xC4;//Power_Control5
 static const uint8_t CMD_PWCTR6  	= 0xFC;//Power_Control6
 static const uint8_t CMD_VCOMCTR1	= 0xC5;//VCOM_Control 1									_CMD_VMCTR1
 static const uint8_t CMD_VCOMCTR2  	= 0xC7;//VCOM_Control 2									_CMD_VMCTR2
-//static const uint8_t CMD_MVMEMWR 	= 0xD0;///NV Memory Write 								>>> NEW <<<<
-//static const uint8_t CMD_MVMEMPK 	= 0xD0;///NV Memory Write 								>>> NEW <<<<
 static const uint8_t CMD_PGAMMAC	= 0xE0;//Positive Gamma Correction Setting				_CMD_POSGAMUT
 static const uint8_t CMD_NGAMMAC	= 0xE1;//Negative Gamma Correction Setting				_CMD_NEGGAMUT
-//static const uint8_t CMD_DGAMMCTRL1 = 0xE2;///Digital Gamma Control 1						>>> NEW <<<<
-//static const uint8_t CMD_DGAMMCTRL2 = 0xE3;///Digital Gamma Control 2						>>> NEW <<<<
-//static const uint8_t CMD_INTFCTRL 	= 0xF6;///Interface Control								>>> NEW <<<<
+
 
 static const uint8_t MADCTL_MY	=	0x80;//*
 static const uint8_t MADCTL_MX	=	0x40;//*
