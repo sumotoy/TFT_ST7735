@@ -66,8 +66,19 @@ static const uint8_t MADCTL_MH	=	0x04;
 1)
 0)
 
-     MY, MX, MV, ML,RGB, MH, D1, D0
-	 0 | 0 | 0 | 0 | 1 | 0 | x | x	//normal
+
+
+	 7   6   5	(128x160 Gm=011)(132x162 Gm=000)
+     MY, MX, MV
+	 0 | 0 | 0 	// Col				| Row			Normal
+	 1 | 0 | 0 	// Col	            | (H-1)-Row		Y-Mir
+	 0 | 1 | 0 	// (W-1)-Col	    | Row			X-Mir
+	 1 | 1 | 0 	// (W-1)-Col	    | (H-1)-Row		XY-Mir
+	 0 | 0 | 1 	// Row  	        | Col			XY-Exc
+	 1 | 0 | 1 	// (H-1)-Row  	    | Col			XY-Exc/Y-Mir	
+	 0 | 1 | 1 	// Row  	        | (W-1)-Col		XY-Exc/X-Mir	
+	 1 | 1 | 1 	// (H-1)-Row  	    | (W-1)-Col		XY-Exc/XY-Mir
+	 
 	 1 | 0 | 0 | 0 | 1 | 0 | x | x	//Y-Mirror
 	 0 | 1 | 0 | 0 | 1 | 0 | x | x	//X-Mirror
 	 1 | 1 | 0 | 0 | 1 | 0 | x | x	//X-Y-Mirror
