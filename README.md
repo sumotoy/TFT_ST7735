@@ -1,9 +1,5 @@
 # TFT_ST7735
-New version tested and works with ESP8266. I just discovered that ST7735 cannot work at high SPI speeds so if you downloaded older version of this library and not work, just open library settings and change 80Mhx to 65Mhz and will work, sorry again for being so stupid to publish something never tested on this processor but I was trusting the code and I was really surprised when discover that was faulty in some way.<br><br>
-A fast driver that works with any Arduino 8 bit, AVR, DUE, Teensy's (all), ESP8266, SPARK
-
-This version it's completely recoded and it's almost equal to my very popular TFT_ILI9163C library, same features, same speed, same commands! It uses my LPGO Font rendering and it's fully SPI Transaction compatible (when applicable).
-This is the FIRST beta, only tested succesfully with Teensy 3.2.<br>
+A brand new version, based on my TFT_ILI9163C, same commands and very fast. Works with Teensy's, Arduino's 8Bit (uno, etc), DUE,ESP8266<br>
 
 <b>FEATURES:</b><br>
 - Very fast
