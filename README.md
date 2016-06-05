@@ -4,9 +4,10 @@ Beware! This is an early alpha, tested only with display below and Teensy 3.0, T
 ![red1](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/redpcb1.jpg)<br>
 
 <b>FEATURES:</b><br>
-- Very fast
-- Same features of TFT_ILI9163C library, same commands.
-- Uses LPGO Font Rendering.
+- Rocket fast!
+- Based on my new TFT_ILI9163C, can share same Icons,Images,Fonts and commands.
+- Don't have the SPI speed limitation of the my old library, tested at 168Mhz.
+- Uses LPGO Font/Icon Rendering.
 - Compatible with many CPU's (see list at the bottom)
 - Fully SPI Transaction compatible.
 - Fully featured set of commands, it's almost impossible you won't find what you'll need!
