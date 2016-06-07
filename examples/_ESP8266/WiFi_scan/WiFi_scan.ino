@@ -17,8 +17,12 @@
 
 TFT_ST7735 tft = TFT_ST7735(__CS, __DC);
 
+int n;
+int startNet;
+int endNet;
+int countNet;
+
 void setup() {
-  Serial.begin(115200);
   tft.begin();
   // Set WiFi to station mode and disconnect from an AP if it was previously connected
   WiFi.mode(WIFI_STA);
@@ -28,10 +32,10 @@ void setup() {
 
 void loop() {
 
-  int n = WiFi.scanNetworks();
-  int startNet = 0;
-  int endNet = 7;
-  int countNet = 1;
+  n = WiFi.scanNetworks();
+  startNet = 0;
+  endNet = 12;
+  countNet = 1;
   tft.clearScreen();
   tft.setCursor(0, 0);
   if (n == 0) {
