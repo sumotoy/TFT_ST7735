@@ -1,6 +1,6 @@
 # TFT_ST7735
 A brand new version, based on my TFT_ILI9163C, same commands and very fast. Works with Teensy's, Arduino's 8Bit (uno, etc), DUE,ESP8266<br>
-Beware! This is an early alpha!<br>
+Now beta stage, tested with Teensy's and ESP8266, pretty stable<br>
 Use the same commands of my TFT_ILI9163C so you can use the same wiki https://github.com/sumotoy/TFT_ILI9163C/wiki<br>
 
 ***
