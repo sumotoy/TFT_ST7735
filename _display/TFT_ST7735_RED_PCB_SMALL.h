@@ -18,8 +18,10 @@
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 	---------------------------------------------------------------------------------------
-	Display Type: RED PCB small
-	https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/redpcb1.jpg
+	Display Type: RED PCB small 1.44" SPI 128*128 V2.1
+	This is really similar to ILI9163 ones but use an ST7735 controller!
+	https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/small_front.jpg
+	https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/small_back.jpg
 ===========================================================================================*/
 	/* Physical display size
 	*/
