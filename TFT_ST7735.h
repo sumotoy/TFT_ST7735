@@ -38,6 +38,8 @@
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Version:
 	1.0p1: First version
+	1.0p1.2: Many fixes, ESP8266 SPI speed, added a display type
+	1.0p1.3: Fixed autocenter text flag
 
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	BugList of the current version:
