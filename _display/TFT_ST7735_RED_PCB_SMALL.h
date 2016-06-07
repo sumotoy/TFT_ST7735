@@ -18,13 +18,13 @@
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 	---------------------------------------------------------------------------------------
-	Display Type: RED PCB version 1
+	Display Type: RED PCB small
 	https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/redpcb1.jpg
 ===========================================================================================*/
 	/* Physical display size
 	*/
 	static const int16_t	TFT_ST7735_TFTWIDTH		=	128;
-	static const int16_t	TFT_ST7735_TFTHEIGHT 	=	160;
+	static const int16_t	TFT_ST7735_TFTHEIGHT 	=	128;
 	static const uint32_t	TFT_ST7735_CGRAM		=	TFT_ST7735_TFTWIDTH * TFT_ST7735_TFTHEIGHT;
 	/* Gamma Set
 	I have included several pre-computed gamma set, you can try any between: 1..4
@@ -32,7 +32,7 @@
 	#define TFT_ST7735_GAMMASET	1
 	/* Colorspace
 	Some display can use GBR colorspace or RGB (1:GBR - 0:RGB) */
-	static const boolean	TFT_ST7735_CSPACE 		= 	0;// 1:GBR - 0:RGB
+	static const boolean	TFT_ST7735_CSPACE 		= 	1;// 1:GBR - 0:RGB
 	/* Offset
 	Vendors like to set his display as they like, result in offset that is different between models
 	Here's a offset map for any rotatio of the display, helping code to deal with this.
@@ -41,8 +41,8 @@
 	static const uint8_t 	TFT_ST7735_OFST[4][2] = {
 		{0,0},//rot 0 - x,y
 		{0,0},//rot 1 - x,y
-		{0,0},//rot 2 - x,y
-		{0,0} //rot 3 - x,y
+		{0,32},//rot 2 - x,y
+		{32,0} //rot 3 - x,y
 	};
 	
 	/*Defines how many bits per pixel are used in the interface*/

@@ -34,6 +34,7 @@
 	Special Thanks:
 	Thanks to Paul Stoffregen for his beautiful Teensy3 and DMA SPI.
 	Thanks to Jnmattern & Marek Buriak for drawArc!
+	Thanks to reaper7 for point me to ESP8266 SPI.write
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Version:
 	1.0p1: First version
@@ -86,11 +87,11 @@
 	static SPISettings _ST7735SPI;
 #endif
 
-#if !defined(swap)
+#if !defined(swapVals)
 	#if defined(ESP8266)
-		#define swap(a, b) { int16_t t = a; a = b; b = t; }
+		#define swapVals(a, b) { int16_t t = a; a = b; b = t; }
 	#else
-		#define swap(a, b) { typeof(a) t = a; a = b; b = t; }
+		#define swapVals(a, b) { typeof(a) t = a; a = b; b = t; }
 	#endif
 #endif
 
@@ -535,18 +536,26 @@ class TFT_ST7735 : public Print {
 
 		void spiwrite(uint8_t c)
 		__attribute__((always_inline)) {
-			SPI.transfer(c);
+			#if defined(_ESP8266_SPIFAST)
+				SPI.write(c);
+			#else
+				SPI.transfer(c);
+			#endif
 		}
 		
 
 		void spiwrite16(uint16_t c)
 		__attribute__((always_inline)) {
-			#if defined(_SPI_MULTITRANSFER)
-			   //last version of ESP8266 for arduino support this
-				uint8_t pattern[2] = { (uint8_t)(c >> 8), (uint8_t)(c >> 0) };
-				SPI.writePattern(pattern, 2, (uint8_t)1);
+			#if defined(_ESP8266_SPIFAST)
+				SPI.write16(c);
 			#else
-				SPI.transfer(c >> 8); SPI.transfer(c >> 0);
+				#if defined(_SPI_MULTITRANSFER)
+					//last version of ESP8266 for arduino support this
+					uint8_t pattern[2] = { (uint8_t)(c >> 8), (uint8_t)(c >> 0) };
+					SPI.writePattern(pattern, 2, (uint8_t)1);
+				#else
+					SPI.transfer(c >> 8); SPI.transfer(c >> 0);
+				#endif
 			#endif
 		}
 		
@@ -697,8 +706,14 @@ class TFT_ST7735 : public Print {
 					    Fast Common Graphic Primitives
    ========================================================================*/
    
-	void setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+	void setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool disComp=false)
 	__attribute__((always_inline)) {
+		if (!disComp){//if false, offset compensate?
+			x0 += TFT_ST7735_OFST[_rotation][0];
+			x1 += TFT_ST7735_OFST[_rotation][0];
+			y0 += TFT_ST7735_OFST[_rotation][1];
+			y1 += TFT_ST7735_OFST[_rotation][1];
+		}
 		writecommand_cont(CMD_CLMADRS); //Column
 		writedata16_cont(x0); writedata16_cont(x1);
 		writecommand_cont(CMD_PGEADRS); //Page
@@ -762,7 +777,7 @@ class TFT_ST7735 : public Print {
 			void 		writedata8_last(uint8_t c);
 			void 		writedata16_last(uint16_t d);
 		#endif
-		void 		setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1/*, bool disComp=false*/);
+		void 		setAddrWindow_cont(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool disComp=false);
 		void 		drawFastHLine_cont(int16_t x, int16_t y, int16_t w, uint16_t color);
 		void 		drawFastVLine_cont(int16_t x, int16_t y, int16_t h, uint16_t color);
 		void 		drawPixel_cont(int16_t x, int16_t y, uint16_t color);
@@ -797,9 +812,9 @@ class TFT_ST7735 : public Print {
 											uint8_t 	scaleX,
 											uint8_t 	scaleY,
 											int16_t 	currentYposition,
-											uint8_t 	cspacing,
-											uint16_t 	foreColor,
-											uint16_t 	backColor
+											/*uint8_t 	cspacing,*/
+											uint16_t 	foreColor
+											/*uint16_t 	backColor*/
 							);
 };
 #endif

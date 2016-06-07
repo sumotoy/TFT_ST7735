@@ -10,7 +10,8 @@ Default: #include "../_display/TFT_ST7735_RED_PCB1.h"
 (uncomment just one below...)
 ----------------------------------------------------------------------------------*/
 #if !defined (TFT_ST7735_INSTANCES)
-	#include "../_display/TFT_ST7735_RED_PCB1.h"
+	//#include "../_display/TFT_ST7735_RED_PCB1.h"
+	#include "../_display/TFT_ST7735_RED_PCB_SMALL.h"
 	//more to come
 #endif
 /*--------------------------------------------------------------------------------
@@ -63,6 +64,15 @@ Default:uncommented
 ----------------------------------------------------------------------------------*/
 #if defined(__MKL26Z64__)
 	#define _TEENSYLC_FASTPORT	
+#endif
+/*--------------------------------------------------------------------------------
+- ESP8266 Faster SPI -
+This force library to use the SPI.write method instead the legacy SPI.transfer.
+As result is much faster. (Thanks Reaper7)
+Default:uncommented
+----------------------------------------------------------------------------------*/
+#if defined(ESP8266)
+	#define _ESP8266_SPIFAST	
 #endif
 /*--------------------------------------------------------------------------------
 - ESP8266 Compatibility mode -

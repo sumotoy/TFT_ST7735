@@ -14,7 +14,7 @@
 	#if defined(ESP8266)
 		#define _smCharType	uint8_t
 		#if defined(SPI_HAS_TRANSACTION)
-			static const uint32_t TFT_ST7735_SPI_SPEED 	= 80000000;
+			static const uint32_t TFT_ST7735_SPI_SPEED 	= 65000000;
 		#endif
 		#define _SPI_MULTITRANSFER	//enable burst multy byte transfer
 	#elif defined(__AVR__)
