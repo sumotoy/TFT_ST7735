@@ -6,9 +6,11 @@ Use the same commands of my TFT_ILI9163C so you can use the same wiki https://gi
 ***
 
 <b>Display's Compatible:</b><br>
-1.8TFT SPI 128*160 Red PCB<br>
+<b>1.8TFT SPI 128*160 Red PCB</b><br>
+Uncomment:<code>#include "../_display/TFT_ST7735_RED_PCB1.h"</code> in settings file<br>
 ![red1](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/redpcb1.jpg)<br>
-1.44" SPI 128*128 V2.1 (similar to ILI9163C but ST7735!)<br>
+<b>1.44" SPI 128*128 V2.1</b> (similar to ILI9163C but ST7735!)<br>
+Uncomment:<code>#include "../_display/TFT_ST7735_RED_PCB_SMALL.h"</code> in settings file<br>
 Front<br>
 ![red2a](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/small_front.jpg)<br>
 Rear<br>
