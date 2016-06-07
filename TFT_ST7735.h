@@ -814,9 +814,7 @@ class TFT_ST7735 : public Print {
 											uint8_t 	scaleX,
 											uint8_t 	scaleY,
 											int16_t 	currentYposition,
-											/*uint8_t 	cspacing,*/
 											uint16_t 	foreColor
-											/*uint16_t 	backColor*/
 							);
 };
 #endif

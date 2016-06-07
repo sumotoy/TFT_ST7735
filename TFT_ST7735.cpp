@@ -357,6 +357,7 @@ void TFT_ST7735::begin(bool avoidSPIinit)
 	#else
 		setFont(&nullfont);
 	#endif
+	delay(30);
 }
 
 /*********************************************************
@@ -2458,9 +2459,7 @@ void TFT_ST7735::_glyphRender_unc(
 							scaleX,
 							scaleY,
 							currentYposition,
-							/*cspacing,*/
 							foreColor
-							/*backColor*/
 					);
 				}
 				currentYposition++;//next line
@@ -2489,9 +2488,7 @@ void TFT_ST7735::_charLineRender(
 									uint8_t 		scaleX,
 									uint8_t 		scaleY,
 									int16_t 		currentYposition,
-									/*uint8_t 		cspacing,*/
 									uint16_t 		foreColor
-									/*uint16_t 		backColor*/
 									)
 {
 	int xlinePos = 0;
