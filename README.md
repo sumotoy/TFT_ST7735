@@ -1,8 +1,18 @@
 # TFT_ST7735
 A brand new version, based on my TFT_ILI9163C, same commands and very fast. Works with Teensy's, Arduino's 8Bit (uno, etc), DUE,ESP8266<br>
-Beware! This is an early alpha, tested only with display below and Teensy 3.0, Teensy LC and Teensy 3.1/2, do not use in production since I'm still working on and just one display file included (in this moment I don't have any more).<br>
+Beware! This is an early alpha!<br>
 Use the same commands of my TFT_ILI9163C so you can use the same wiki https://github.com/sumotoy/TFT_ILI9163C/wiki<br>
+
+***
+
+<b>Display's Compatible:</b><br>
+1.8TFT SPI 128*160 Red PCB<br>
 ![red1](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/redpcb1.jpg)<br>
+1.44" SPI 128*128 V2.1 (similar to ILI9163C but ST7735!)<br>
+Front<br>
+![red2a](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/small_front.jpg)<br>
+Rear<br>
+![red2b](https://github.com/sumotoy/TFT_ST7735/blob/docs/Images/small_back.jpg)<br>
 
 <b>FEATURES:</b><br>
 - Rocket fast!
