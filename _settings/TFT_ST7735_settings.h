@@ -11,7 +11,7 @@ Default: #include "../_display/TFT_ST7735_RED_PCB1.h"
 ----------------------------------------------------------------------------------*/
 #if !defined (TFT_ST7735_INSTANCES)
 	#include "../_display/TFT_ST7735_RED_PCB1.h"
-	//#include "../_display/TFT_ST7735_RED_PCB_SMALL.h"//1.44" 128*128 V2.1
+	//#include "../_display/TFT_ST7735_RED_PCB_SMALL.h"
 	//more to come
 #endif
 /*--------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ Uncomment _ST7735_SIZEOPTIMIZER will decrease space needed by code but some perf
 will suffer a bit, however it can be usefult in many cases!
 Default:uncommented (automatically enabled for some CPU)
 ----------------------------------------------------------------------------------*/
-#if !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__SAM3X8E__)// && !defined(ESP8266)
+#if !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__SAM3X8E__) && !defined(__MK64FX512__) && !defined(__MK66FX1M0__)// && !defined(ESP8266)
 #define _ST7735_SIZEOPTIMIZER			
 #endif		
 /*--------------------------------------------------------------------------------

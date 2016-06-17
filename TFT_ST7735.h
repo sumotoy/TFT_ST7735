@@ -40,7 +40,7 @@
 	1.0p1: First version
 	1.0p1.2: Many fixes, ESP8266 SPI speed, added a display type
 	1.0p1.3: Fixed autocenter text flag
-
+	1.0p1.4: Compatibility with more Teensy's
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	BugList of the current version:
 	- Due hardware limitation the scroll it's only vertical but in rotation mode change direction!
@@ -110,7 +110,7 @@ class TFT_ST7735 : public Print {
 
  public:
 
-	#if defined(__MK20DX128__) || defined(__MK20DX256__)
+	#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
 		TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
 	#elif defined(__MKL26Z64__)
 		TFT_ST7735(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
@@ -436,8 +436,8 @@ class TFT_ST7735 : public Print {
 			#endif
 		}
 
-/* ----------------- ARM (Teensy 3.0, Teensy 3.1, Teensy 3.2) ------------------------*/
-	#elif defined(__MK20DX128__) || defined(__MK20DX256__)
+/* ----------------- ARM (Teensy 3.0, Teensy 3.1, Teensy 3.2, Teensy 3.4, Teensy 3.5) ----------*/
+	#elif defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
 		uint8_t 			pcs_data, pcs_command;
 		uint8_t 			_mosi, _sclk;
 		uint8_t 			_cs;
@@ -663,7 +663,7 @@ class TFT_ST7735 : public Print {
 	-------------------- Common low level commands ------------------------
 	Teensy 3.x uses different functions, This are for all the rest of MCU's
    ========================================================================*/
-	#if !defined(__MK20DX128__) && !defined(__MK20DX256__)
+	#if !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__MK64FX512__) && !defined(__MK66FX1M0__)
 		void writecommand_cont(const uint8_t c)
 		__attribute__((always_inline)) {
 			enableCommandStream();
@@ -771,7 +771,7 @@ class TFT_ST7735 : public Print {
 	void 		clearMemory(void);
 	
 	#if defined(_ST7735_SIZEOPTIMIZER)
-		#if !defined(__MK20DX128__) && !defined(__MK20DX256__)
+		#if !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__MK64FX512__) && !defined(__MK66FX1M0__)
 			void 		writecommand_cont(const uint8_t c);
 			void 		writedata8_cont(uint8_t c);
 			void 		writedata16_cont(uint16_t d);
