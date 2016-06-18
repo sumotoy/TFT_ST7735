@@ -35,13 +35,16 @@ TFT_ST7735 tft = TFT_ST7735(__CS1, __DC);
 
 
 
-
+volatile uint8_t rot = 0;
+volatile uint8_t test = 0;
 
 
 void setup() {
+/*
 	Serial.begin(38400);
 	long unsigned debug_start = millis();
 	while (!Serial && ((millis() - debug_start) <= 5000));
+*/
 	tft.begin();
 }
 
@@ -128,8 +131,7 @@ void runTest(uint8_t test, uint8_t rot)
 	}
 }
 
-uint8_t rot = 0;
-uint8_t test = 0;
+
 
 
 

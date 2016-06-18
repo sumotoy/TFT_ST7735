@@ -31,9 +31,9 @@ TFT_ST7735 tft = TFT_ST7735(__CS1, __DC);
 
 
 void setup() {
-	//Serial.begin(38400);
-	//long unsigned debug_start = millis ();
-	//while (!Serial && ((millis () - debug_start) <= 5000)) ;
+	Serial.begin(38400);
+	long unsigned debug_start = millis ();
+	while (!Serial && ((millis () - debug_start) <= 5000)) ;
 	tft.begin();
 	//the following it's mainly for Teensy
 	//it will help you to understand if you have choosed the

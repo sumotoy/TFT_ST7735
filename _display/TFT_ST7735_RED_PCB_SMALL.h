@@ -1,5 +1,5 @@
-#ifndef _TFT_ST7735_REDPCB1_H
-#define _TFT_ST7735_REDPCB1_H
+#ifndef _TFT_ST7735_REDPCBSMALL_H
+#define _TFT_ST7735_REDPCBSMALL_H
 #include <stdio.h>
 /*=========================================================================================
 	Part of TFT_ST7735 library

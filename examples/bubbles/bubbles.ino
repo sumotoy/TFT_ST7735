@@ -1,10 +1,6 @@
 /*
 	This example was adapted from ugfx http://ugfx.org
 	It's a great example of many 2d objects in a 3d space (matrix transformations)
-	and show the capabilities of RA8875 chip.
- Tested and worked with:
- Teensy3,Teensy3.1,Arduino UNO,Arduino YUN,Arduino Leonardo,Stellaris
- Works with Arduino 1.0.6 IDE, Arduino 1.5.8 IDE, Energia 0013 IDE
 */
 #ifdef __AVR__
 #define sinf sin
@@ -32,7 +28,7 @@ ESP8266-----------------------------------
 Use:
 #define __CS  16  //(D0)
 #define __DC  5   //(D1)
-#define __RST 4   //(D2)
+//#define __RST 4   //(D2)
 
  SCLK:D5
  MOSI:D7
@@ -65,7 +61,7 @@ void initialize (void){
     sine[i] = (int)(sinf(PI2 * i / SCALE) * SCALE);
 }
 
-void setup()
+void setup() 
 {
   tft.begin();
   initialize();
@@ -146,7 +142,7 @@ void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]){
   }
 }
 
-void loop()
+void loop() 
 {
   matrix(xyz, col);
   rotate(xyz, angleX, angleY, angleZ);
@@ -163,21 +159,21 @@ void loop()
 
   if (angleX >= SCALE) {
     angleX -= SCALE;
-  }
+  } 
   else if (angleX < 0) {
     angleX += SCALE;
   }
 
   if (angleY >= SCALE) {
     angleY -= SCALE;
-  }
+  } 
   else if (angleY < 0) {
     angleY += SCALE;
   }
 
   if (angleZ >= SCALE) {
     angleZ -= SCALE;
-  }
+  } 
   else if (angleZ < 0) {
     angleZ += SCALE;
   }
