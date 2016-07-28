@@ -7,6 +7,10 @@
     "type": "git",
     "url": "https://github.com/sumotoy/TFT_ST7735/tree/1.0p1"
   },
+  "version": "1.0.1b1",
   "frameworks": "arduino",
-  "platforms": "*"
+  "platforms": "*",
+  "build": {
+    "srcFilter": "+<*.cpp>"
+  }  
 }
