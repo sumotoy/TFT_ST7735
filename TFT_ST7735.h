@@ -93,7 +93,7 @@
 	#if defined(ESP8266)
 		#define swapVals(a, b) { int16_t t = a; a = b; b = t; }
 	#else
-		#define swapVals(a, b) { typeof(a) t = a; a = b; b = t; }
+		#define swapVals(a, b) { __typeof__(a) t = a; a = b; b = t; }
 	#endif
 #endif
 
