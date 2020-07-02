@@ -34,7 +34,7 @@ void setup() {
 	//long unsigned debug_start = millis ();
 	//while (!Serial && ((millis () - debug_start) <= 5000)) ;
 	tft.begin();
-	tft.print("ready);
+	tft.print("ready");
 }
 
 void loop(void) {
