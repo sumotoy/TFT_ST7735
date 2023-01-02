@@ -587,8 +587,8 @@ class TFT_ST7735 : public Print {
 	
 		void spiwrite16(uint16_t c)
 		__attribute__((always_inline)) {
-			SPI.transfer(d >> 8);
-			SPI.transfer(d);
+			SPI.transfer(c >> 8);
+			SPI.transfer(c);
 		}
 		
 		
@@ -604,7 +604,7 @@ class TFT_ST7735 : public Print {
 		__attribute__((always_inline)) {
 			if (!_dcState){
 				digitalWrite(_rs,HIGH);
-				__dcState = 1;
+				_dcState = 1;
 			}
 		}
 		
